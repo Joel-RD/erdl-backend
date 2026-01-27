@@ -1,4 +1,7 @@
-import Databases, { Database as DB } from "better-sqlite3"
+import { createClient } from "@libsql/client"
+import { config } from "../config";
 import path from "path"
 
-export const connectionDB = new Databases(path.join(process.cwd(), "src", "Database", "databases.db"));
+const { db_turso } = config;
+const turso_connect = await config.db_turso(path.join("file:", process.cwd(), "src", "Database", "databases.db"));
+export const turso = createClient(turso_connect);   

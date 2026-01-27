@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { SnowflakeGenerator } from "../utils/snowflake"
-import { UserRepository } from "../repository/implementationDB/SqliteUserRepository"
-import { connectionDB } from "../Database/databases"
+import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository.js"
+import { turso } from "../Database/databases"
 import { config } from "../config.js"
 import path from "path";
 
-const userRepository = new UserRepository(connectionDB);
+const userRepository = new UserRepository(turso);
 const { baseUrl } = config;
 
 export class UserController {
@@ -30,10 +30,11 @@ export class UserController {
 
 
             if (!short_url) {
-                return res.json({
-                    message: "Error al crear la URL acortada.",
-                    url_acortada: "ERROR"
-                })
+                return res
+                    .status(500)
+                    .json({
+                        message: "Error al crear la URL acortada.",
+                    })
             }
 
             res.json({

@@ -3,9 +3,15 @@ import { config } from "./config";
 import usersRouter from "./routers/usersRouters";
 import path from "path";
 import morgan from "morgan";
+import cors from "cors"
 
 const app = express();
+const corsOptions = ({
+  origin: config.baseUrl
+})
 
+app.set('true proxy', true)
+app.use(cors(corsOptions))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "src", "public")));

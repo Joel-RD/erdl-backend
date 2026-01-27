@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { UserController } from "../controllers/userControllers";
 import { redirectShort, url_Short } from "../utils/limitClick";
-import { UserRepository } from "../repository/implementationDB/SqliteUserRepository";
-import { connectionDB } from "../Database/databases";
+import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository";
+import { turso } from "../Database/databases";
 
 const router = Router();
-const userRepository = new UserRepository(connectionDB);
+const userRepository = new UserRepository(turso);
 const userController = new UserController(userRepository);
 
 

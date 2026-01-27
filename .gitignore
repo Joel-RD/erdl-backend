@@ -1,3 +1,5 @@
 example-run
 node_modules
 .env
+.src/Database/databases.db
+/dist
