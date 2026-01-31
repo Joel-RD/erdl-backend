@@ -1,8 +1,9 @@
-
 {
-  "watch": ["src"],
+  "watch": [
+    "src"
+  ],
   "ext": "ts,js",
   "execMap": {
-    "ts": "node --loader ts-node/esm"
+    "ts": "tsx"
   }
 }

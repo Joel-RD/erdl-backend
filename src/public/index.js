@@ -77,7 +77,22 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         if (res.status === 429) {
             errorEl.textContent = `❌ ${data.message || 'Has alcanzado el límite semanal de URLs acortadas.'}`;
             errorEl.classList.add('show');
-        } else if (data.url_acortada) {
+            return
+        }
+
+        if (res.status === 500) {
+            errorEl.textContent = `❌ ${data.message || 'Error al conectar con el servidor.'}`;
+            errorEl.classList.add('show');
+            return
+        }
+
+        if (res.status === 400) {
+            errorEl.textContent = `❌ ${data.message || 'Error al acortar la URL.'}`;
+            errorEl.classList.add('show');
+            return
+        }
+
+        if (data.url_acortada) {
             resultEl.innerHTML = `
                         <strong>✅ URL acortada:</strong><br>
                         <a href="${data.url_acortada}" target="_blank">${data.url_acortada}</a><br>
@@ -95,19 +110,13 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
-        } else if (data.error) {
-            errorEl.textContent = `❌ ${data.error}`;
-            errorEl.classList.add('show');
-        } else if (data.message) {
-            errorEl.textContent = `❌ ${data.message}`;
-            errorEl.classList.add('show');
-        } else {
-            errorEl.textContent = '❌ Error desconocido al procesar la solicitud.';
-            errorEl.classList.add('show');
+            return
         }
+
     } catch (err) {
         errorEl.textContent = '❌ Error al conectar con el servidor. Verifica tu conexión.';
         errorEl.classList.add('show');
+        return
     } finally {
         // Rehabilitar botón
         submitBtn.disabled = false;
