@@ -59,7 +59,7 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
     submitBtn.textContent = '⏳ Acortando...';
 
     try {
-        const res = await fetch(`http://localhost:3000/api/v1/short?id_short=${machineId}`, {
+        const res = await fetch(`/api/v1/short?id_short=${machineId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
