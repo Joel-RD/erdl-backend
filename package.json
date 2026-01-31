@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/run.ts",
-    "build": "tsc && dist/src/run.js",
-    "snowflake": "tsx example-run/snowflake_demo.ts"
+    "build": "tsc",
+    "start": "node dist/src/run.js"
   },
   "keywords": [],
   "author": "",

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { SnowflakeGenerator } from "../utils/snowflake"
+import { SnowflakeGenerator } from "../utils/snowflake.js"
 import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository.js"
-import { turso } from "../Database/databases"
+import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
 import path from "path";
 

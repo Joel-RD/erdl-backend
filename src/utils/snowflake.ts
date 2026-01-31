@@ -1,4 +1,4 @@
-import { Base62Converter } from "./base62";
+import { Base62Converter } from "./base62.js";
 
 export class SnowflakeGenerator {
     private machineId: number;

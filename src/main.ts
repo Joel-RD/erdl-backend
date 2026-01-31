@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
-import { config } from "./config";
-import usersRouter from "./routers/usersRouters";
+import { config } from "./config.js";
+import usersRouter from "./routers/usersRouters.js";
 import path from "path";
 import morgan from "morgan";
 import cors from "cors"

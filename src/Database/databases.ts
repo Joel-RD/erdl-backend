@@ -1,5 +1,5 @@
 import { createClient } from "@libsql/client"
-import { config } from "../config";
+import { config } from "../config.js";
 import path from "path"
 
 const { db_turso } = config;

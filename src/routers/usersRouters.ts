@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { UserController } from "../controllers/userControllers";
-import { redirectShort, url_Short } from "../utils/limitClick";
-import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository";
-import { turso } from "../Database/databases";
+import { UserController } from "../controllers/userControllers.js";
+import { redirectShort, url_Short } from "../utils/limitClick.js";
+import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository.js";
+import { turso } from "../Database/databases.js";
 
 const router = Router();
 const userRepository = new UserRepository(turso);
