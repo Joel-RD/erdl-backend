@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Autenticación</title>
+    <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+
+<body>
+    <div class="container_auth">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>Bienvenido</h1>
+                <p>Inicia sesión o regístrate para continuar</p>
+            </div>
+
+            <!-- Formulario de Login -->
+            <div id="loginForm" class="form-container_auth active">
+                <h2>Iniciar Sesión</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Correo Electrónico</label>
+                        <input type="email" id="login-email" name="email" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" name="password" required placeholder="••••••••">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="remember-me" name="remember">
+                        <label for="remember-me">Recordarme</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    <div class="form-footer">
+                        <a href="#" class="link">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <div id="registerForm" class="form-container_auth">
+                <h2>Crear Cuenta</h2>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-name">Nombre Completo</label>
+                        <input type="text" id="register-name" name="username" required placeholder="Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Correo Electrónico</label>
+                        <input type="email" id="register-email" name="email" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" name="password" required placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar Contraseña</label>
+                        <input type="password" id="register-confirm-password" name="confirmPassword" required
+                            placeholder="••••••••">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">Acepto los términos y condiciones</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrarse</button>
+                </form>
+            </div>
+
+            <!-- Toggle entre Login y Registro -->
+            <div class="toggle-form">
+                <p id="toggle-text">¿No tienes cuenta? <a href="#" id="toggle-link">Regístrate aquí</a></p>
+            </div>
+
+            <!-- Mensajes de alerta -->
+            <div id="alert-container"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/utils/validation.js"></script>
+    <script src="/static/js/utils/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Autenticación</title>
+    <link rel="stylesheet" href="/static/css/verifyEmail.css">
+</head>
+
+<body>
+    <div class="container_auth">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>Bienvenido</h1>
+                <p>Verifica tu correo electronico</p>
+            </div>
+
+            <!-- Formulario de codigos de verificacion-->
+            <div id="verifyEmailForm" class="form-container_auth active">
+                <h2>Verificacion de codigo</h2>
+                <form id="verifyEmailForm">
+                    <div class="form-group">
+                        <label for="login-email">Codigo</label>
+                        <input type="text" id="code" name="code" required
+                            placeholder="Ingresa tu codigo de verificacion">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verificar...</button>
+                </form>
+            </div>
+
+            <!-- Mensajes de alerta -->
+            <div id="alert-container"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/utils/validation.js"></script>
+    <script src="/static/js/utils/api.js"></script>
+    <script src="/static/js/verifyEmail.js"></script>
+</body>
+
+</html>

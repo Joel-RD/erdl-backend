@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { UserController } from "../controllers/userControllers";
 import { redirectShort, url_Short } from "../utils/limitClick";
-import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository";
+import { UserRepository } from "../repository/urlShortAnonimusRepository";
 import { turso } from "../Database/databases";
 
 const router = Router();

@@ -1,4 +1,4 @@
-import { IUserRepository } from "../interfaceUrlShortAnonimusDB";
+import { IUserRepository } from "../models/types.js"
 import { Client } from "@libsql/client";
 
 export class UserRepository implements IUserRepository {
