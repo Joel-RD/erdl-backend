@@ -6,7 +6,7 @@ export class AuthRepository implements IUserAuthRepository {
 
     async findByEmail(email: string): Promise<any | null> {
         const result = await this.DB.execute({
-            sql: "SELECT * FROM users WHERE email = ?",
+            sql: "SELECT * FROM users WHERE email = ? limit 1",
             args: [email]
         });
         return result.rows[0] || null;

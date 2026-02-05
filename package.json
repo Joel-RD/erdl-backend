@@ -6,15 +6,18 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/run.ts",
-    "build": "tsc && dist/src/run.js",
+    "build": "tsc",
+    "start": "node dist/src/run.js",
     "snowflake": "tsx example-run/snowflake_demo.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@libsql/client": "^0.17.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
@@ -29,9 +32,10 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@libsql/client": "^0.17.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
+    "cookie-parser": "^1.4.7",
+    "cookies": "^0.9.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",

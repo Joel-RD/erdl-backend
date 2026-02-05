@@ -1,7 +1,3 @@
-
-const API_BASE_URL = 'http://localhost:3000';
-
-
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 const toggleLink = document.getElementById('toggle-link');
@@ -15,10 +11,6 @@ const registerFormElement = document.getElementById('register-form');
 // Estado actual
 let currentForm = 'login'; // 'login' o 'register'
 
-
-/**
- * Muestra una alerta en la interfaz
- */
 function showAlert(message, type = 'info') {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
@@ -34,9 +26,6 @@ function showAlert(message, type = 'info') {
     }, 5000);
 }
 
-/**
- * Alterna entre el formulario de login y registro
- */
 function toggleForms() {
     if (currentForm === 'login') {
         loginForm.classList.remove('active');
@@ -59,36 +48,6 @@ function toggleForms() {
     });
 }
 
-// Las funciones isValidEmail e isStrongPassword han sido reemplazadas por 
-// validateEmail y validatePassword definidas en /static/js/utils/validation.js
-
-
-
-/**
- * Guarda el token en localStorage
- */
-function saveToken(token) {
-    window.api.removeToken(); // Limpiar previo si existe
-    localStorage.setItem('authToken', token);
-}
-
-/**
- * Obtiene el token de localStorage
- */
-function getToken() {
-    return window.api.getToken();
-}
-
-/**
- * Elimina el token de localStorage
- */
-function removeToken() {
-    window.api.removeToken();
-}
-
-/**
- * Añade estado de carga a un botón
- */
 function setButtonLoading(button, loading) {
     if (loading) {
         button.classList.add('loading');
@@ -99,41 +58,38 @@ function setButtonLoading(button, loading) {
     }
 }
 
-// ===== PETICIONES A LA API =====
-
-/**
- * Verifica el estado de autenticación
- */
 async function checkAuthStatus() {
     try {
-        const token = getToken();
-
-        const response = await window.api.fetch(`/api/v1/auth`, {
+        const response = await fetch(`/api/v1/auth`, {
             method: 'GET'
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            console.log('Usuario autenticado:', data);
-            return data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            if (response.ok) {
+                console.log('Usuario autenticado:', data);
+                return data;
+            }
         } else {
-            console.log('No autenticado');
-            return null;
+            console.log('Respuesta no es JSON (posiblemente HTML de página de login)');
         }
+
+        console.log('No autenticado');
+        return null;
     } catch (error) {
         console.error('Error al verificar autenticación:', error);
         return null;
     }
 }
 
-/**
- * Registra un nuevo usuario
- */
 async function register(userData) {
     try {
-        const response = await window.api.fetch(`/api/v1/auth/register`, {
+        const response = await fetch(`/api/v1/auth/register`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(userData)
         });
 
@@ -150,13 +106,13 @@ async function register(userData) {
     }
 }
 
-/**
- * Inicia sesión
- */
 async function login(credentials) {
     try {
-        const response = await window.api.fetch(`/api/v1/auth/login`, {
+        const response = await fetch(`/api/v1/auth/login`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(credentials)
         });
 
@@ -173,7 +129,6 @@ async function login(credentials) {
     }
 }
 
-// ===== MANEJADORES DE EVENTOS =====
 
 loginFormElement.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -197,26 +152,23 @@ loginFormElement.addEventListener('submit', async (e) => {
     if (!passwordValidation.isValid) {
         showAlert(passwordValidation.errors[0], 'error');
         return;
-    }
+    } 
 
     const submitButton = loginFormElement.querySelector('button[type="submit"]');
     setButtonLoading(submitButton, true);
 
-    const result = await login({ email, password });
-
+    const result = await login({ email: email, password: password });
     setButtonLoading(submitButton, false);
 
     if (result.success) {
-        // Guardar token si existe
-        if (result.data.token) {
-            saveToken(result.data.token);
-        }
 
         showAlert('¡Inicio de sesión exitoso!', 'success');
 
+        const data = { token: result.data.token, email: result.data.email };
+        cookieStore.set('emailSendToVerifyUser', JSON.stringify(data));
         loginFormElement.reset();
 
-        window.location.href = '/api/v1/auth/verify-email';
+        window.location.href = `/api/v1/auth/verify-email?token=${result.data.token}`;
         setTimeout(() => {
             console.log('Usuario logueado:', result.data);
         }, 1500);
@@ -269,8 +221,10 @@ registerFormElement.addEventListener('submit', async (e) => {
     setButtonLoading(submitButton, false);
 
     if (result.success) {
-        showAlert('¡Registro exitoso! Ahora puedes iniciar sesión', 'success');
+        showAlert('¡Registro exitoso! Iniciando sesión...', 'success');
 
+        // Automáticamente intentamos loguear o dejamos que el usuario lo haga.
+        // El backend no devuelve token en registro actualmente, por lo que no guardamos nada.
         registerFormElement.reset();
 
         setTimeout(() => {
@@ -286,11 +240,6 @@ toggleLink.addEventListener('click', (e) => {
     toggleForms();
 });
 
-// ===== INICIALIZACIÓN =====
-
-/**
- * Verifica si el usuario ya está autenticado al cargar la página
- */
 document.addEventListener('DOMContentLoaded', async () => {
     const authStatus = await checkAuthStatus();
 
@@ -298,12 +247,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Usuario ya autenticado:', authStatus);
     }
 });
-
-window.authAPI = {
-    login,
-    register,
-    checkAuthStatus,
-    saveToken,
-    getToken,
-    removeToken
-};

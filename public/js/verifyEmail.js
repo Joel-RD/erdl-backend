@@ -1,9 +1,6 @@
 const verifyEmailForm = document.getElementById('verifyEmailForm');
 const alertContainer = document.getElementById('alert-container');
 
-/**
- * Muestra una alerta en la interfaz
- */
 function showAlert(message, type = 'info') {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
@@ -19,31 +16,6 @@ function showAlert(message, type = 'info') {
     }, 5000);
 }
 
-/**
- * Guarda el token en localStorage
- */
-function saveToken(token) {
-    window.api.removeToken();
-    localStorage.setItem('authToken', token);
-}
-
-/**
- * Obtiene el token de localStorage
- */
-function getToken() {
-    return window.api.getToken();
-}
-
-/**
- * Elimina el token de localStorage
- */
-function removeToken() {
-    window.api.removeToken();
-}
-
-/**
- * Añade estado de carga a un botón
- */
 function setButtonLoading(button, loading) {
     if (loading) {
         button.classList.add('loading');
@@ -54,18 +26,17 @@ function setButtonLoading(button, loading) {
     }
 }
 
-// ===== PETICIONES A LA API =====
-
-/**
- * Verifica el código de email
- */
 async function verifyEmailCode(code) {
     try {
-        const response = await window.api.fetch(`/api/v1/auth/verify-email`, {
+        const cookie = await cookieStore.get('emailSendToVerifyUser');
+        const dataCookies = JSON.parse(cookie.value)
+        const response = await fetch(`/api/v1/auth/verify-email?token=${dataCookies.token}`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ code })
         });
-
         const data = await response.json();
 
         if (response.ok) {
@@ -79,7 +50,6 @@ async function verifyEmailCode(code) {
     }
 }
 
-// ===== MANEJADORES DE EVENTOS =====
 
 verifyEmailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -87,11 +57,10 @@ verifyEmailForm.addEventListener('submit', async (e) => {
     const code = document.getElementById('code').value.trim();
 
     if (!code) {
-        showAlert('Por favor ingresa el código de verificación', 'error');
+        showAlert('Por favor ingresa el código de verificación', 'error'); 
         return;
     }
 
-    // Validación básica del código (ajusta según tu formato)
     if (code.length < 4) {
         showAlert('El código debe tener al menos 4 caracteres', 'error');
         return;
@@ -105,31 +74,25 @@ verifyEmailForm.addEventListener('submit', async (e) => {
     setButtonLoading(submitButton, false);
 
     if (result.success) {
-        // Guardar token si existe
-        if (result.token) {
-            saveToken(result.token);
-        }
-
+        
         showAlert('¡Verificación exitosa!', 'success');
-
         verifyEmailForm.reset();
 
-        // Redirigir al usuario después de la verificación
+        await cookieStore.delete('emailSendToVerifyUser');
         setTimeout(() => {
-            console.log('Email verificado:', result.data);
-            // Puedes redirigir a otra página aquí
-            // window.location.href = '/dashboard';
-        }, 1500);
-    } else {
-        showAlert(result.error, 'error');
+            window.location.href = '/api/v1/auth/protected/profile';
+        }, 3000);
+        return;
     }
+
+    if (result.error) {
+        window.location.href = '/api/v1/auth';
+        return;
+    }
+    showAlert(result.error, 'error');
 });
 
-// ===== INICIALIZACIÓN =====
-
-/**
- * Verifica si el usuario ya está autenticado al cargar la página
- */
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Página de verificación de email cargada');
 });
+

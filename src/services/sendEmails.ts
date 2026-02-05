@@ -3,6 +3,7 @@ import { config } from "../config.js";
 import { generateVerificationCode } from "../utils/codeValidatedEmail.js";
 
 export const codeGenerate = generateVerificationCode();
+const {configSendEmail} = config;
 
 const templateEmailHtml = (code: string) => {
     return `
@@ -19,19 +20,19 @@ const templateEmailHtml = (code: string) => {
 };
 
 const transport = nodemailer.createTransport({
-    host: config.emailHost,
-    port: Number(config.emailPort),
-    secure: config.emailSecure === 'true',
+    host: configSendEmail.emailHost,
+    port: Number(configSendEmail.emailPort),
+    secure: configSendEmail.emailSecure === 'true',
     auth: {
-        user: config.emailUser,
-        pass: config.emailPass
+        user: configSendEmail.emailUser,
+        pass: configSendEmail.emailPass
     }
 } as TransportOptions);
 
 const sendMail = async (to: string, subject: string, text: string, html: string) => {
     try {
         const info = await transport.sendMail({
-            from: `"Midnight Services" <${config.emailUser}>`,
+            from: `"Midnight Services" <${configSendEmail.emailUser}>`,
             to,
             subject,
             text,

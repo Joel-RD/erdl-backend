@@ -1,8 +1,8 @@
 import { Response } from "express";
 import { RequestModel } from "../models/types.js"
-import { SnowflakeGenerator } from "../utils/snowflake"
+import { SnowflakeGenerator } from "../utils/snowflake.js"
 import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
-import { turso } from "../Database/databases"
+import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
 import path from "path";
 
@@ -28,7 +28,6 @@ export class UserController {
             const urlID = snowflake.generateShortUrl();
 
             const short_url = await this.userRepository.create(urlID, orig_url);
-
 
             if (!short_url) {
                 return res
@@ -60,7 +59,7 @@ export class UserController {
             const originalUrl = await this.userRepository.findById(shortUrl);
 
             if (!originalUrl) {
-                return res.status(404).json({ message: "URL no encontrada." });
+                return res.sendFile(path.join(process.cwd(), 'public', 'error.html'))
             }
 
             res.redirect(originalUrl);

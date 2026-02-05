@@ -1,28 +1,42 @@
 import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
-import { config } from "../config";
+import { Response, NextFunction } from "express";
+import { RequestModel } from "../models/types.js"
+import { config } from "../config.js";
 
 const JWT_SECRET = config.jwtSecret;
 
-interface RequestModel extends Request {
-  userEmail?: string;
-}
-
 export function authJWT(req: RequestModel, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).redirect("/api/v1/auth");
+  const tokenCookies = req.cookies.authTokenAuthotized;
+  
+  if (!tokenCookies) {
+    return res.redirect("/api/v1/auth");
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = tokenCookies;
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).redirect("/api/v1/auth");
+      return res.redirect("/api/v1/auth");
     }
-
-    req.userEmail = decoded as string;
     next();
   });
 }
+
+export async function verifySendToEmail(req: RequestModel, res: Response, next: NextFunction) {
+  const tokenValidEmail = req.query.token;
+
+  if (!tokenValidEmail) {
+    res.redirect("/api/v1/auth");
+    return
+  }
+
+  const token = tokenValidEmail;
+
+  jwt.verify(token as string, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      res.redirect("/api/v1/auth")
+      return
+    }
+    next();
+  });
+} 
