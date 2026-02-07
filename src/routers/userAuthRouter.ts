@@ -1,8 +1,7 @@
 import { Router, Response } from "express";
 import { limitAuthButton } from "../utils/limitClick.js";
-import { authJWT, verifySendToEmail } from "../Middleware/authJWT.js"
+import { verifySendToEmail } from "../Middleware/authJWT.js"
 import { userAuthController } from "../controllers/userAuthController.js";
-import { RequestModel } from "../models/types.js";
 import { AuthRepository } from "../repository/userAuthRepository.js";
 import { turso } from "../Database/databases.js";
 

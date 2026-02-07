@@ -1,4 +1,5 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { NextFunction, Response } from "express";
+import { RequestModel as Request } from "./models/types.js"
 import { config } from "./config.js";
 import usersRouter from "./routers/usersRouters.js";
 import userAuthRouter from "./routers/userAuthRouter.js";
@@ -23,6 +24,15 @@ app.use('/static', express.static(path.join(process.cwd(), "public")));
 
 app.use(morgan("dev"));
 app.use(usersRouter);
+
+//block auth for brach origin router
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.url.includes('/api/v1/')) {
+    return res.redirect("/home")
+  }
+  next();
+})
+
 app.use('/api/v1/', userAuthRouter);
 app.use('/auth/protected', userProtectedAuthorized)
 

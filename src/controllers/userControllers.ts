@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { RequestModel } from "../models/types.js"
+import { RequestModel as Request } from "../models/types.js"
 import { SnowflakeGenerator } from "../utils/snowflake.js"
 import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
 import { turso } from "../Database/databases.js"
@@ -12,11 +12,11 @@ const { baseUrl } = config;
 export class UserController {
     constructor(private userRepository: UserRepository) { }
 
-    homeController = async (req: RequestModel, res: Response) => {
+    homeController = async (req: Request, res: Response) => {
         res.sendFile(path.join(process.cwd(), "public", "home.html"));
     }
 
-    shortenerController = async (req: RequestModel, res: Response) => {
+    shortenerController = async (req: Request, res: Response) => {
         try {
             const { orig_url } = req.body;
 
@@ -48,7 +48,7 @@ export class UserController {
         }
     }
 
-    redirectShortController = async (req: RequestModel, res: Response) => {
+    redirectShortController = async (req: Request, res: Response) => {
         try {
             const { shortUrl } = req.params;
 
@@ -69,6 +69,3 @@ export class UserController {
         }
     }
 }
-
-
-

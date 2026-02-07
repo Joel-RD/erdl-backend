@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from "express";
+import { Response } from "express";
 import { AuthRepository } from "../repository/userAuthRepository.js"
 import { sendVerificationEmail } from "../services/sendEmails.js"
 import { turso } from "../Database/databases.js"
 import { validateRegistration } from "../utils/validateUserData.js"
 import { hashPassword, comparePassword } from "../utils/password_encrypt.js"
 import { generateVerificationCode } from "../utils/codeValidatedEmail.js"
-import { RequestModel } from "../models/types.js"
+import { RequestModel as Request } from "../models/types.js"
 import { config } from "../config.js"
 import { generateJWTToken } from "../utils/jwt.js"
 import crypto from "crypto";
@@ -18,11 +18,11 @@ const tokenVerifyEmail = crypto.randomUUID;
 export class userAuthController {
     constructor(private authControllerRepository: AuthRepository) { }
 
-    homeAuthController = async (req: RequestModel, res: Response) => {
+    homeAuthController = async (req: Request, res: Response) => {
         res.sendFile(path.join(process.cwd(), "public", "auth.html"));
     }
 
-    authRegisterController = async (req: RequestModel, res: Response) => {
+    authRegisterController = async (req: Request, res: Response) => {
         try {
             if (!req.body) {
                 console.error("authRegisterController: req.body is undefined");
@@ -64,7 +64,7 @@ export class userAuthController {
         }
     }
 
-    authLoginController = async (req: RequestModel, res: Response) => {
+    authLoginController = async (req: Request, res: Response) => {
         try {
             if (!req.body) {
                 return res.status(400).json({ message: "Request body is missing" });
@@ -106,7 +106,7 @@ export class userAuthController {
         }
     }
 
-    authVerifyEmailHomeController = async (req: RequestModel, res: Response) => {
+    authVerifyEmailHomeController = async (req: Request, res: Response) => {
         const verificationCode = generateVerificationCode();
         const cookieRaw = req.cookies['emailSendToVerifyUser']; 
 
@@ -119,7 +119,7 @@ export class userAuthController {
         res.sendFile(path.join(process.cwd(), "public", "verifyEmail.html"));
     }
 
-    postAuthVerifyEmailController = async (req: RequestModel, res: Response) => {
+    postAuthVerifyEmailController = async (req: Request, res: Response) => {
         try {
             const dataCookies = JSON.parse(req.cookies['emailSendToVerifyUser']);
             const { code } = req.body;

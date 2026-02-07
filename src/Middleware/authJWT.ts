@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 import { Response, NextFunction } from "express";
-import { RequestModel } from "../models/types.js"
+import { RequestModel as Request } from "../models/types.js"
 import { config } from "../config.js";
 
 const JWT_SECRET = config.jwtSecret;
 
-export function authJWT(req: RequestModel, res: Response, next: NextFunction) {
+export function authJWT(req: Request, res: Response, next: NextFunction) {
   const tokenCookies = req.cookies.authTokenAuthotized;
   
   if (!tokenCookies) {
@@ -22,7 +22,7 @@ export function authJWT(req: RequestModel, res: Response, next: NextFunction) {
   });
 }
 
-export async function verifySendToEmail(req: RequestModel, res: Response, next: NextFunction) {
+export async function verifySendToEmail(req: Request, res: Response, next: NextFunction) {
   const tokenValidEmail = req.query.token;
 
   if (!tokenValidEmail) {
