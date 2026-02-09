@@ -59,7 +59,7 @@ export class UserController {
             const originalUrl = await this.userRepository.findById(shortUrl);
 
             if (!originalUrl) {
-                return res.status(404).json({ message: "URL no encontrada." });
+                return res.sendFile(path.join(process.cwd(), "src", "public", "error.html"));
             }
 
             res.redirect(originalUrl);
