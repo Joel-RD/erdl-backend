@@ -1,39 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔗 URL Shortener</title>
-    <link rel="stylesheet" href="/index.css">
+    <title>erdl.my - Acortador de URLs</title>
+    <link rel="stylesheet" href="index.css">
 </head>
+
 <body>
+    <div class="lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>🔗 URL Shortener</h1>
-            <p>Acorta tus enlaces de forma rápida y sencilla</p>
+            <h2>erdl.my</h2>
         </div>
 
         <form id="shorten-form">
-            <div class="form-group">
-                <label for="orig_url">
-                    🌐 URL Original
-                </label>
-                <input type="url" id="orig_url" name="orig_url" placeholder="https://example.com/tu-url-larga" required>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submit-btn">
-                ✨ Acortar URL
-            </button>
+            <input type="url" id="orig_url" class="form-group" name="orig_url" placeholder="https://www.google.com"
+                required autocomplete="off">
+            <button type="submit" class="submit-btn" id="submit-btn">acortar</button>
         </form>
 
-        <div class="result-section">
+        <div class="result-section" id="result-section">
             <div id="result"></div>
-            <div id="error"></div>
             <div id="qrcode"></div>
+        </div>
+
+        <div id="error-seccion"></div>
+
+        <div class="footer-info">
+            Seguro · Rápido · Sin registro
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="/index.js"></script>
+    <script src="index.js"></script>
 </body>
+
 </html>

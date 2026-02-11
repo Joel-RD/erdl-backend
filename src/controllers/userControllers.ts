@@ -22,7 +22,7 @@ export class UserController {
             if (!orig_url || typeof orig_url !== "string") {
                 return res.status(400).json({ message: "Debe ingresar una URL válida." });
             }
-
+            
             const snowflake = new SnowflakeGenerator(1);
             const urlID = snowflake.generateShortUrl();
 
@@ -39,7 +39,7 @@ export class UserController {
 
             res.json({
                 message: "URL acortada con éxito.",
-                url_acortada: `${baseUrl}/${short_url}`,
+                url_acortada: `${baseUrl}/${"short_url"}`,
             });
 
         } catch (error) {

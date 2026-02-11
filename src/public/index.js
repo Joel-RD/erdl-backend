@@ -19,7 +19,18 @@ function getMachineId() {
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        alert('✅ URL copiada al portapapeles');
+        // Cambiar temporalmente el texto del botón
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Copiado';
+        btn.style.background = '#1a4d32';
+        btn.style.borderColor = '#2a6d42';
+        
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.style.borderColor = '';
+        }, 2000);
     }).catch(() => {
         alert('❌ No se pudo copiar la URL');
     });
@@ -30,18 +41,20 @@ let qrcodeInstance = null;
 document.getElementById('shorten-form').addEventListener('submit', async function (e) {
     e.preventDefault();
 
+    const resultSeccion = document.getElementById('result-section');
     const resultEl = document.getElementById('result');
-    const errorEl = document.getElementById('error');
+    const errorEl = document.getElementById('error-seccion');
     const qrcodeEl = document.getElementById('qrcode');
     const submitBtn = document.getElementById('submit-btn');
 
     // Limpiar resultados previos
     qrcodeEl.innerHTML = '';
-    qrcodeEl.style.display = 'none';
-    resultEl.textContent = '';
+    qrcodeEl.classList.remove('show');
+    resultEl.innerHTML = '';
     resultEl.classList.remove('show');
     errorEl.textContent = '';
     errorEl.classList.remove('show');
+    resultSeccion.classList.remove('active');
     qrcodeInstance = null;
 
     const orig_url = document.getElementById('orig_url').value.trim();
@@ -56,7 +69,7 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
 
     // Deshabilitar botón durante la petición
     submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Acortando...';
+    submitBtn.textContent = '...';
 
     try {
         const res = await fetch(`/api/v1/short?id_short=${machineId}`, {
@@ -77,49 +90,51 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         if (res.status === 429) {
             errorEl.textContent = `❌ ${data.message || 'Has alcanzado el límite semanal de URLs acortadas.'}`;
             errorEl.classList.add('show');
-            return
+            return;
         }
 
         if (res.status === 500) {
             errorEl.textContent = `❌ ${data.message || 'Error al conectar con el servidor.'}`;
             errorEl.classList.add('show');
-            return
+            return;
         }
 
         if (res.status === 400) {
             errorEl.textContent = `❌ ${data.message || 'Error al acortar la URL.'}`;
             errorEl.classList.add('show');
-            return
+            return;
         }
 
         if (data.url_acortada) {
+            resultSeccion.classList.add('active');
+            
             resultEl.innerHTML = `
-                        <strong>✅ URL acortada:</strong><br>
-                        <a href="${data.url_acortada}" target="_blank">${data.url_acortada}</a><br>
-                        <button class="copy-btn" onclick="copyToClipboard('${data.url_acortada}')">📋 Copiar URL</button>
-                    `;
+                <strong>✓ Url acortada</strong>
+                <a href="${data.url_acortada}" target="_blank">${data.url_acortada}</a>
+                <button class="copy-btn" onclick="copyToClipboard('${data.url_acortada}')">Copiar</button>
+            `;
             resultEl.classList.add('show');
 
             // Generar código QR
-            qrcodeEl.style.display = 'block';
+            qrcodeEl.classList.add('show');
             qrcodeInstance = new QRCode(qrcodeEl, {
                 text: data.url_acortada,
-                width: 200,
-                height: 200,
-                colorDark: "#667eea",
+                width: 128,
+                height: 128,
+                colorDark: "#0a0a0a",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
-            return
+
+            return;
         }
 
     } catch (err) {
         errorEl.textContent = '❌ Error al conectar con el servidor. Verifica tu conexión.';
         errorEl.classList.add('show');
-        return
+        return;
     } finally {
-        // Rehabilitar botón
         submitBtn.disabled = false;
-        submitBtn.textContent = '✨ Acortar URL';
+        submitBtn.textContent = 'acortar';
     }
 });
