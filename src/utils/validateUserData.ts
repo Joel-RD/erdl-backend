@@ -81,11 +81,9 @@ export function validatePassword(password: string): {
     errors: string[]
 } {
     const errors: string[] = [];
-    let score = 0;
 
     // Requisitos mínimos
     const minLength = 12;
-    const maxLength = 128;
 
     // Validar que la contraseña no esté vacía
     if (!password || password.trim() === '') {
@@ -99,44 +97,27 @@ export function validatePassword(password: string): {
     // Validar longitud mínima
     if (password.length < minLength) {
         errors.push(`La contraseña debe tener al menos ${minLength} caracteres`);
-    } else {
-        score += 1;
-        if (password.length >= 16) score += 1;
-        if (password.length >= 20) score += 1;
-    }
-
-    // Validar longitud máxima
-    if (password.length > maxLength) {
-        errors.push(`La contraseña no puede exceder ${maxLength} caracteres`);
     }
 
     // Validar al menos una letra minúscula
     if (!/[a-z]/.test(password)) {
         errors.push('Debe contener al menos una letra minúscula');
-    } else {
-        score += 1;
     }
 
     // Validar al menos una letra mayúscula
     if (!/[A-Z]/.test(password)) {
         errors.push('Debe contener al menos una letra mayúscula');
-    } else {
-        score += 1;
     }
 
     // Validar al menos un número
     if (!/\d/.test(password)) {
         errors.push('Debe contener al menos un número');
-    } else {
-        score += 1;
     }
 
     // Validar al menos un carácter especial
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
         errors.push('Debe contener al menos un carácter especial (!@#$%^&*...)');
-    } else {
-        score += 2;
-    }
+    } 
 
     // Validar que no contenga espacios
     if (/\s/.test(password)) {
@@ -149,16 +130,6 @@ export function validatePassword(password: string): {
         'admin123', 'letmein', 'welcome', 'monkey', '1234567890'
     ];
 
-    if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
-        errors.push('La contraseña contiene patrones comunes y predecibles');
-        score = Math.max(0, score - 2);
-    }
-
-    // Validar que no tenga caracteres repetidos consecutivos (más de 2)
-    if (/(.)\1{2,}/.test(password)) {
-        errors.push('Evita usar el mismo carácter más de 2 veces consecutivas');
-    }
-
     // Validar secuencias numéricas o alfabéticas
     if (/(?:012|123|234|345|456|567|678|789|890|abc|bcd|cde|def)/i.test(password)) {
         errors.push('Evita secuencias predecibles de números o letras');
@@ -166,11 +137,11 @@ export function validatePassword(password: string): {
 
     // Determinar fortaleza basada en el puntaje
     let strength: 'débil' | 'media' | 'fuerte' | 'muy fuerte';
-    if (score <= 3) {
+    if (password.length <= 3) {
         strength = 'débil';
-    } else if (score <= 5) {
+    } else if (password.length <= 5) {
         strength = 'media';
-    } else if (score <= 7) {
+    } else if (password.length <= 10) {
         strength = 'fuerte';
     } else {
         strength = 'muy fuerte';
