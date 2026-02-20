@@ -33,15 +33,15 @@ A robust and scalable URL shortener built with **Node.js**, **Express**, and **L
 
 ## 📂 Project Structure
 
-```
+```text
 src/
 ├── controllers/    # Request handlers (Auth, User logic)
 ├── models/         # TypeScript interfaces and types
 ├── routers/        # API Documentation & Route definitions
 ├── repository/     # Database access layer
-├── services/       # Business logic (e.g., Snowflake Generator)
+├── services/       # Business logic (e.g., Email Service)
 ├── Middleware/     # Auth checks, Rate limiting
-├── utils/          # Helpers (validation, conversion)
+├── utils/          # Helpers (Snowflake Generator, validation)
 ├── Database/       # DB connection setup
 ├── config.ts       # Environment configuration
 ├── main.ts         # App initialization & Middleware setup
@@ -58,6 +58,7 @@ src/
 - npm or pnpm
 - A Turso database URL and Auth Token (or local SQLite file)
 - Gmail account (for email sending) or SMTP credentials
+- Redis server (for rate limiting)
 
 ### Installation
 
@@ -114,8 +115,9 @@ src/
 | `POST` | `/auth/login`         | Login and receive HttpOnly cookie                |
 | `GET`  | `/auth/verify-email`  | Verify email address (via link code)             |
 | `POST` | `/auth/verify-email`  | Resend verification email                        |
-| `GET`  | `/auth`               | Check auth status / Home                         |
-| `GET`  | `/profile`            | **Protected**. Get user profile (Requires Login) |
+| `GET`  | `/auth`               | Check auth status                                |
+| `GET`  | `/home`               | Home page (Redirects if authenticated)           |
+| `GET`  | `/auth/user/profile`  | **Protected**. Get user profile (Requires Login) |
 
 ---
 

@@ -26,7 +26,7 @@ describe('Middleware: authJWT', () => {
             json: jest.fn()
         };
         next = jest.fn();
-        jest.clearAllMocks(); 
+        jest.clearAllMocks();
     });
 
     describe('authJWT', () => {
@@ -37,7 +37,7 @@ describe('Middleware: authJWT', () => {
         });
 
         it('should call next() if token is valid', () => {
-            req.cookies = { authTokenAuthotized: 'valid-token' };
+            req.cookies = { authTokenAuthorized: 'valid-token' };
             (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
                 callback(null, { userId: '123' });
             });
@@ -49,8 +49,8 @@ describe('Middleware: authJWT', () => {
         });
 
         it('should redirect if token is invalid', () => {
-            req.cookies = { authTokenAuthotized: 'invalid-token' };
-            (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => { 
+            req.cookies = { authTokenAuthorized: 'invalid-token' };
+            (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
                 callback(new Error('Invalid token'), null);
             });
 
@@ -61,13 +61,13 @@ describe('Middleware: authJWT', () => {
     });
 
     describe('verifySendToEmail', () => {
-        it('should redirect if no token in query', () => {
+        it('should redirect if no token in cookies', () => {
             verifySendToEmail(req as Request, res as Response, next);
             expect(res.redirect).toHaveBeenCalledWith('/api/v1/auth');
         });
 
         it('should call next() if token is valid', () => {
-            req.query = { token: 'valid-token' };
+            req.cookies = { emailSendToVerifyUser: JSON.stringify({ token: 'valid-token' }) };
             (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
                 callback(null, { email: 'test@test.com' });
             });
@@ -77,7 +77,7 @@ describe('Middleware: authJWT', () => {
         });
 
         it('should redirect if token is invalid', () => {
-            req.query = { token: 'invalid-token' };
+            req.cookies = { emailSendToVerifyUser: JSON.stringify({ token: 'invalid-token' }) };
             (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
                 callback(new Error('Invalid token'), null);
             });

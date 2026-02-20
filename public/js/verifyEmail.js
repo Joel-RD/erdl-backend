@@ -1,13 +1,25 @@
-const verifyEmailForm = document.getElementById('verifyEmailForm');
-const alertContainer = document.getElementById('alert-container');
+/**
+ * Verify Email Page Logic
+ */
 
+// --- DOM Constants ---
+const UI = {
+    form: document.getElementById('verify-form'),
+    codeField: document.getElementById('code'),
+    submitBtn: document.getElementById('submit-verify'),
+    alertContainer: document.getElementById('alert-container'),
+};
+
+/**
+ * Displays an alert message.
+ */
 function showAlert(message, type = 'info') {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
     alert.textContent = message;
 
-    alertContainer.innerHTML = '';
-    alertContainer.appendChild(alert);
+    UI.alertContainer.innerHTML = '';
+    UI.alertContainer.appendChild(alert);
 
     // Auto-ocultar después de 5 segundos
     setTimeout(() => {
@@ -16,48 +28,56 @@ function showAlert(message, type = 'info') {
     }, 5000);
 }
 
-function setButtonLoading(button, loading) {
-    if (loading) {
-        button.classList.add('loading');
-        button.disabled = true;
+/**
+ * Sets button loading state.
+ */
+function setButtonLoading(isLoading) {
+    if (isLoading) {
+        UI.submitBtn.classList.add('loading');
+        UI.submitBtn.disabled = true;
     } else {
-        button.classList.remove('loading');
-        button.disabled = false;
+        UI.submitBtn.classList.remove('loading');
+        UI.submitBtn.disabled = false;
     }
 }
 
+/**
+ * API Wrapper: Verify Email Code
+ */
 async function verifyEmailCode(code) {
     try {
-        const cookie = await cookieStore.get('emailSendToVerifyUser');
-        const dataCookies = JSON.parse(cookie.value)
-        const response = await fetch(`/api/v1/auth/verify-email?token=${dataCookies.token}`, {
+        const cookieValue = cookieUtils.get('emailSendToVerifyUser');
+        if (!cookieValue) {
+            throw new Error('Sesión de verificación expirada. Por favor, intenta de nuevo.');
+        }
+
+        const { token } = JSON.parse(cookieValue);
+        const response = await fetch(`/api/v1/auth/verify-email?token=${token}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ code })
         });
-        const data = await response.json();
 
-        if (response.ok) {
-            return { success: true, data };
-        } else {
-            return { success: false, error: data.message || 'Error al verificar el código' };
-        }
+        const data = await response.json();
+        return response.ok
+            ? { success: true, data }
+            : { success: false, error: data.message || 'Código de verificación incorrecto.' };
     } catch (error) {
-        console.error('Error en verificación:', error);
-        return { success: false, error: 'Error de conexión con el servidor' };
+        console.error('Email verification error:', error);
+        return { success: false, error: error.message || 'Error de conexión con el servidor.' };
     }
 }
 
+// --- Event Listeners ---
 
-verifyEmailForm.addEventListener('submit', async (e) => {
+UI.form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const code = document.getElementById('code').value.trim();
+    const code = UI.codeField.value.trim();
 
     if (!code) {
-        showAlert('Por favor ingresa el código de verificación', 'error'); 
+        showAlert('Por favor ingresa el código de verificación', 'error');
         return;
     }
 
@@ -66,33 +86,20 @@ verifyEmailForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    const submitButton = verifyEmailForm.querySelector('button[type="submit"]');
-    setButtonLoading(submitButton, true);
-
+    setButtonLoading(true);
     const result = await verifyEmailCode(code);
-
-    setButtonLoading(submitButton, false);
+    setButtonLoading(false);
 
     if (result.success) {
-        
-        showAlert('¡Verificación exitosa!', 'success');
-        verifyEmailForm.reset();
-
-        await cookieStore.delete('emailSendToVerifyUser');
+        showAlert('¡Verificación exitosa! Redirigiendo...', 'success');
+        cookieUtils.delete('emailSendToVerifyUser');
         setTimeout(() => {
-            window.location.href = '/api/v1/auth/protected/profile';
+            window.location.href = '/api/v1/auth/user/profile';
         }, 3000);
-        return;
+    } else {
+        showAlert(result.error, 'error');
+        if (result.error.includes('expirada')) {
+            cookieUtils.delete('emailSendToVerifyUser');
+        }
     }
-
-    if (result.error) {
-        window.location.href = '/api/v1/auth';
-        return;
-    }
-    showAlert(result.error, 'error');
 });
-
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Página de verificación de email cargada');
-});
-

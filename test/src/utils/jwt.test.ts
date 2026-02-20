@@ -1,4 +1,4 @@
-import { generateJWTToken } from '../../../src/utils/jwt';
+import { userAuthJWToken } from '../../../src/utils/jwt';
 import jwt from 'jsonwebtoken';
 
 // Mock config to avoid loading .env files or failing if missing
@@ -11,7 +11,7 @@ jest.mock('../../../src/config', () => ({
 describe('generateJWTToken', () => {
     it('should generate a valid JWT token', () => {
         const email = 'test@example.com';
-        const token = generateJWTToken(email);
+        const token = userAuthJWToken(email);
 
         expect(typeof token).toBe('string');
 

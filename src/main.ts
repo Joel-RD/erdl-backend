@@ -25,16 +25,8 @@ app.use('/static', express.static(path.join(process.cwd(), "public")));
 app.use(morgan("dev"));
 app.use(usersRouter);
 
-//block auth for brach origin router
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (req.url.includes('/api/v1/')) {
-    return res.redirect("/home")
-  }
-  next();
-})
-
 app.use('/api/v1/', userAuthRouter);
-app.use('/auth/protected', userProtectedAuthorized)
+app.use('/api/v1/', userProtectedAuthorized)
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).sendFile(path.join(process.cwd(), "public", "error.html"));

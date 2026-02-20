@@ -45,3 +45,14 @@ export class SnowflakeGenerator {
         return Base62Converter.encodeInteger(BigInt(uniqueId));
     }
 }
+
+// Demo execution for `npm run snowflake`
+if (process.argv[1]?.endsWith('snowflake.ts')) {
+    const generator = new SnowflakeGenerator(1);
+    console.log("❄️ Snowflake ID Generator Demo");
+    console.log("----------------------------");
+    for (let i = 0; i < 5; i++) {
+        const shortUrl = generator.generateShortUrl();
+        console.log(`Generated Short URL ${i + 1}: ${shortUrl}`);
+    }
+}

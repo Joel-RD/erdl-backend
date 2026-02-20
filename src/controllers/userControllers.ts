@@ -39,7 +39,7 @@ export class UserController {
 
             res.json({
                 message: "URL acortada con éxito.",
-                url_acortada: `${baseUrl}/${short_url}`,
+                url_acortada: `${baseUrl}/${urlID}`,
             });
 
         } catch (error) {

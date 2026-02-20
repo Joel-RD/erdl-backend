@@ -7,6 +7,10 @@ interface User {
     userEmail: string;
 }
 
-export const generateJWTToken = (userEmail: string): string => {
+export const userAuthJWToken = (userEmail: string): string => {
     return jwt.sign({ userEmail: userEmail }, JWT_SECRET, { expiresIn: "2d" });
+};
+
+export const emailValidJWToken = (userEmail: string): string => {
+    return jwt.sign({ userEmail: userEmail }, JWT_SECRET, { expiresIn: "2m" });
 };
