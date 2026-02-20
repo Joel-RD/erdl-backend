@@ -1,109 +1,135 @@
 # 🔗 Shortener URL
 
-A powerful and efficient URL shortener built with **Node.js**, **Express**, and **LibSQL (SQLite/Turso)**. It uses a custom **Snowflake ID** generator combined with **Base62** encoding to create unique, short, and scalable URLs.
+A robust and scalable URL shortener built with **Node.js**, **Express**, and **LibSQL (Turso)**. It features a custom **Snowflake ID** generator for unique, sortable IDs and includes a full user authentication system with email verification.
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Features
 
-The project follows a clean architecture pattern, separating concerns between controllers, repositories, and data sources.
+- **Custom ID Generation**: Uses a Snowflake algorithm (Timestamp + Machine ID + Sequence) combined with Base62 encoding for short, unique URLs (e.g., `a7X2k`).
+- **User Authentication**: Secure JWT-based authentication with HttpOnly cookies.
+  - Register & Login.
+  - Email Verification (Nodemailer).
+  - Protected Routes.
+- **Data Persistence**: LibSQL (SQLite compatibility) on Turso.
+- **Security**:
+  - Rate Limiting (prevents abuse).
+  - CORS configuration.
+  - Password Hashing (bcryptjs).
+- **Architecture**: Clean separation of concerns (Controllers, Repositories, Services, Routers).
 
-```mermaid
-graph TD
-    User([User/Client]) -- POST /api/v1/short --> Controller[UserController]
-    User -- GET /:shortUrl --> Controller
-    
-    subgraph Logic
-        Controller -- 1. Generate ID --> Snowflake[SnowflakeGenerator]
-        Snowflake -- 2. Base62 Encode --> ID[Short ID]
-        Controller -- 3. Save/Lookup --> Repo[UserRepository]
-    end
-    
-    subgraph Data
-        Repo -- Queries --> DB[(LibSQL / Turso)]
-        Repo -- Cache --> Redis[(Redis)]
-    end
-    
-    Repo -- Return URL --> Controller
-    Controller -- Response/Redirect --> User
+---
+
+## 🛠️ Tech Stack
+
+- **Runtime**: [Node.js](https://nodejs.org/) & [TypeScript](https://www.typescriptlang.org/)
+- **Framework**: [Express.js](https://expressjs.com/)
+- **Database**: [LibSQL / Turso](https://turso.tech/)
+- **Authentication**: [JWT](https://jwt.io/) & [Bcryptjs](https://www.npmjs.com/package/bcryptjs)
+- **Email**: [Nodemailer](https://nodemailer.com/)
+- **Utilities**: [Zod](https://zod.dev/) (Validation), [Morgan](https://www.npmjs.com/package/morgan) (Logging)
+
+---
+
+## 📂 Project Structure
+
+```text
+src/
+├── controllers/    # Request handlers (Auth, User logic)
+├── models/         # TypeScript interfaces and types
+├── routers/        # API Documentation & Route definitions
+├── repository/     # Database access layer
+├── services/       # Business logic (e.g., Email Service)
+├── Middleware/     # Auth checks, Rate limiting
+├── utils/          # Helpers (Snowflake Generator, validation)
+├── Database/       # DB connection setup
+├── config.ts       # Environment configuration
+├── main.ts         # App initialization & Middleware setup
+└── run.ts          # Server entry point
 ```
-
----
-
-## ❄️ Snowflake + Base62 ID Generation
-
-To ensure unique and lexicographically sortable IDs without collisions, the system uses a **Snowflake** algorithm:
-
-1.  **Timestamp**: 41+ bits (milliseconds since custom Epoch).
-2.  **Machine ID**: 5 bits (allows up to 32 independent nodes).
-3.  **Sequence**: 5 bits (allows up to 32 IDs per millisecond per node).
-
-The resulting 64-bit integer is then encoded into **Base62** (`0-9`, `a-z`, `A-Z`) to produce the final short URL (e.g., `a7X2k`).
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+)
-- SQLite / Turso Account (Optional for local dev)
-- Redis (Optional for rate limiting/caching)
+- npm or pnpm
+- A Turso database URL and Auth Token (or local SQLite file)
+- Gmail account (for email sending) or SMTP credentials
+- Redis server (for rate limiting)
 
 ### Installation
-1.  Clone the repository:
+
+1. **Clone the repository**:
+
     ```bash
     git clone https://github.com/Joel-RD/shortener-url.git
     cd shortener-url
     ```
-2.  Install dependencies:
+
+2. **Install dependencies**:
+
     ```bash
     npm install
     ```
-3.  Configure environment variables:
+
+3. **Configure Environment**:
+    Copy the example file and fill in your details:
+
     ```bash
-    cp .env.example .env # Update with your database/port settings
+    cp .env.example .env
     ```
-4.  Run in development mode:
+
+    **Required Variables** in `.env`:
+    - `DB_TURSO_URL`: Your database connection string.
+    - `DB_TURSO_AUTH_TOKEN`: Your database auth token.
+    - `JWT_SECRET`: Secret key for signing tokens.
+    - `EMAIL_USER` / `EMAIL_PASS`: Credentials for sending verification emails.
+
+4. **Run Development Server**:
+
     ```bash
     npm run dev
     ```
 
----
-
-## 📡 API Documentation
-
-### 1. Shorten a URL
-**Endpoint**: `POST /api/v1/short`  
-**Body**:
-```json
-{
-  "orig_url": "https://www.google.com"
-}
-```
-**Response**:
-```json
-{
-  "message": "URL acortada con éxito.",
-  "url_acortada": "http://localhost:3000/a7X2k"
-}
-```
-
-### 2. Redirect
-**Endpoint**: `GET /:shortUrl`  
-**Action**: Redirects the user to the original long URL.
+    The server will start at `http://localhost:3000`.
 
 ---
 
-## 🛠️ Tech Stack
+## 📡 API Reference
 
-- **Runtime**: [Node.js](https://nodejs.org/)
-- **Framework**: [Express.js](https://expressjs.com/)
-- **Database**: [LibSQL](https://github.com/tursodatabase/libsql-client-ts) (Turso/SQLite)
-- **Caching**: [Redis](https://redis.io/)
-- **ID Gen**: Custom Snowflake + Base62
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
+### 🔗 URL Shortener
+
+| Method | Endpoint        | Description                              | Body Example                         |
+| :----- | :-------------- | :--------------------------------------- | :----------------------------------- |
+| `POST` | `/api/v1/short` | Shorten a new URL                        | `{ "orig_url": "https://google.com"}` |
+| `GET`  | `/:shortUrl`    | Redirect to original URL (e.g. `/a7X2k`) | N/A                                  |
+
+### 🔐 Authentication
+
+| Method | Endpoint              | Description                                      |
+| :----- | :-------------------- | :----------------------------------------------- |
+| `POST` | `/auth/register`      | Register a new user                              |
+| `POST` | `/auth/login`         | Login and receive HttpOnly cookie                |
+| `GET`  | `/auth/verify-email`  | Verify email address (via link code)             |
+| `POST` | `/auth/verify-email`  | Resend verification email                        |
+| `GET`  | `/auth`               | Check auth status                                |
+| `GET`  | `/home`               | Home page (Redirects if authenticated)           |
+| `GET`  | `/auth/user/profile`  | **Protected**. Get user profile (Requires Login) |
+
+---
+
+## 🧪 Scripts
+
+- `npm run dev`: Start development server with Nodemon.
+- `npm run build`: Compile TypeScript to JavaScript.
+- `npm start`: Run the built application.
+- `npm run snowflake`: Run a demo of the Snowflake ID generator.
 
 ---
 
 ## 📄 License
+
 This project is licensed under the ISC License.

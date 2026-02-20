@@ -1,4 +1,4 @@
-import { Base62Converter } from "./base62.js";
+import { Base62Converter } from "./base62Convert.js";
 
 export class SnowflakeGenerator {
     private machineId: number;
@@ -43,5 +43,16 @@ export class SnowflakeGenerator {
     generateShortUrl(): string {
         const uniqueId = this.getNextId();
         return Base62Converter.encodeInteger(BigInt(uniqueId));
+    }
+}
+
+// Demo execution for `npm run snowflake`
+if (process.argv[1]?.endsWith('snowflake.ts')) {
+    const generator = new SnowflakeGenerator(1);
+    console.log("❄️ Snowflake ID Generator Demo");
+    console.log("----------------------------");
+    for (let i = 0; i < 5; i++) {
+        const shortUrl = generator.generateShortUrl();
+        console.log(`Generated Short URL ${i + 1}: ${shortUrl}`);
     }
 }

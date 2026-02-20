@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Aldrich&family=Inter:wght@400;600;700&family=Teko:wght@400;500&display=swap');
+
+:root {
+    --card-bg: #222222;
+    --brand-green: #cbe896;
+    --input-beige: #e3d4b6;
+    --action-yellow: #fcdfa6;
+    --result-gray: #c8d2c8;
+    --icon-green: #78A75A;
+    --text-dark: #000000;
+    --separator: #CCCCCC;
+    --card-radius: 30px;
+    --input-radius: 10px;
+    
+    /* Animation timings */
+    --transition-fast: 0.3s ease;
+    --transition-mid: 0.4s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(149, 143, 143, 0.3);
+    backdrop-filter: blur(6px);
+    z-index: 0;
+}
+
+/* Background Grid */
+.bg-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(203, 232, 150, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(203, 232, 150, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    from { transform: translate(0, 0); }
+    to { transform: translate(50px, 50px); }
+}
+
+/* Particles Layer */
+.floating-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--brand-green);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: floatParticle 15s infinite ease-in-out;
+}
+
+@keyframes floatParticle {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+    25% { transform: translate(30px, -50px) scale(1.5); opacity: 0.7; }
+    50% { transform: translate(-20px, -100px) scale(1); opacity: 0.3; }
+    75% { transform: translate(40px, -150px) scale(1.2); opacity: 0.5; }
+}
+
+/* Accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Spin animation for icons/loaders */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

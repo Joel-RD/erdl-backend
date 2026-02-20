@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1770559147055" clover="3.2.0">
-  <project timestamp="1770559147056" name="All files">
-    <metrics statements="65" coveredstatements="46" conditionals="16" coveredconditionals="12" methods="13" coveredmethods="10" elements="94" coveredelements="68" complexity="0" loc="65" ncloc="65" packages="2" files="3" classes="3"/>
+<coverage generated="1771551180480" clover="3.2.0">
+  <project timestamp="1771551180480" name="All files">
+    <metrics statements="222" coveredstatements="163" conditionals="104" coveredconditionals="67" methods="31" coveredmethods="22" elements="357" coveredelements="252" complexity="0" loc="222" ncloc="222" packages="3" files="10" classes="10"/>
     <package name="Middleware">
-      <metrics statements="23" coveredstatements="23" conditionals="8" coveredconditionals="8" methods="4" coveredmethods="4"/>
-      <file name="authJWT.ts" path="/home/joelrd01/Documents/code/shortener-url/src/Middleware/authJWT.ts">
-        <metrics statements="23" coveredstatements="23" conditionals="8" coveredconditionals="8" methods="4" coveredmethods="4"/>
+      <metrics statements="35" coveredstatements="26" conditionals="14" coveredconditionals="9" methods="6" coveredmethods="4"/>
+      <file name="authJWT.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/Middleware/authJWT.ts">
+        <metrics statements="35" coveredstatements="26" conditionals="14" coveredconditionals="9" methods="6" coveredmethods="4"/>
         <line num="1" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -19,21 +19,33 @@
         <line num="19" count="1" type="stmt"/>
         <line num="21" count="1" type="stmt"/>
         <line num="25" count="1" type="stmt"/>
-        <line num="26" count="3" type="stmt"/>
-        <line num="28" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="27" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="28" count="1" type="stmt"/>
         <line num="29" count="1" type="stmt"/>
-        <line num="30" count="1" type="stmt"/>
+        <line num="32" count="2" type="stmt"/>
         <line num="33" count="2" type="stmt"/>
-        <line num="35" count="2" type="stmt"/>
-        <line num="36" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="37" count="1" type="stmt"/>
-        <line num="38" count="1" type="stmt"/>
-        <line num="40" count="1" type="stmt"/>
+        <line num="35" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="40" count="2" type="stmt"/>
+        <line num="41" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="42" count="1" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="51" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="56" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="57" count="0" type="stmt"/>
+        <line num="59" count="0" type="stmt"/>
       </file>
     </package>
     <package name="repository">
       <metrics statements="42" coveredstatements="23" conditionals="8" coveredconditionals="4" methods="9" coveredmethods="6"/>
-      <file name="urlShortAnonimusRepository.ts" path="/home/joelrd01/Documents/code/shortener-url/src/repository/urlShortAnonimusRepository.ts">
+      <file name="urlShortAnonimusRepository.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/repository/urlShortAnonimusRepository.ts">
         <metrics statements="16" coveredstatements="14" conditionals="4" coveredconditionals="2" methods="3" coveredmethods="3"/>
         <line num="4" count="1" type="stmt"/>
         <line num="5" count="4" type="stmt"/>
@@ -52,7 +64,7 @@
         <line num="38" count="1" type="stmt"/>
         <line num="39" count="1" type="stmt"/>
       </file>
-      <file name="userAuthRepository.ts" path="/home/joelrd01/Documents/code/shortener-url/src/repository/userAuthRepository.ts">
+      <file name="userAuthRepository.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/repository/userAuthRepository.ts">
         <metrics statements="26" coveredstatements="9" conditionals="4" coveredconditionals="2" methods="6" coveredmethods="3"/>
         <line num="4" count="1" type="stmt"/>
         <line num="5" count="4" type="stmt"/>
@@ -80,6 +92,175 @@
         <line num="71" count="0" type="stmt"/>
         <line num="73" count="0" type="stmt"/>
         <line num="74" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="utils">
+      <metrics statements="145" coveredstatements="114" conditionals="82" coveredconditionals="54" methods="16" coveredmethods="12"/>
+      <file name="base62Convert.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/base62Convert.ts">
+        <metrics statements="22" coveredstatements="22" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="2" count="2" type="stmt"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="9" count="4" type="stmt"/>
+        <line num="10" count="4" type="stmt"/>
+        <line num="12" count="4" type="stmt"/>
+        <line num="13" count="23" type="stmt"/>
+        <line num="16" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="18" count="3" type="stmt"/>
+        <line num="19" count="3" type="stmt"/>
+        <line num="20" count="32" type="stmt"/>
+        <line num="21" count="32" type="stmt"/>
+        <line num="24" count="3" type="stmt"/>
+        <line num="32" count="9" type="stmt"/>
+        <line num="34" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="36" count="7" type="stmt"/>
+        <line num="37" count="7" type="stmt"/>
+        <line num="39" count="7" type="stmt"/>
+        <line num="40" count="31" type="stmt"/>
+        <line num="41" count="31" type="stmt"/>
+        <line num="42" count="31" type="stmt"/>
+        <line num="45" count="7" type="stmt"/>
+      </file>
+      <file name="codeValidatedEmail.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/codeValidatedEmail.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="7" count="4" type="stmt"/>
+        <line num="8" count="4" type="stmt"/>
+        <line num="10" count="4" type="stmt"/>
+        <line num="11" count="126" type="stmt"/>
+        <line num="14" count="4" type="stmt"/>
+      </file>
+      <file name="jwt.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/jwt.ts">
+        <metrics statements="7" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="0" type="stmt"/>
+      </file>
+      <file name="limitClick.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/limitClick.ts">
+        <metrics statements="13" coveredstatements="4" conditionals="12" coveredconditionals="0" methods="3" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="11" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="14" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="25" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="28" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="39" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="42" count="0" type="cond" truecount="0" falsecount="2"/>
+      </file>
+      <file name="password_encrypt.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/password_encrypt.ts">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+      </file>
+      <file name="snowflake.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/snowflake.ts">
+        <metrics statements="29" coveredstatements="20" conditionals="8" coveredconditionals="5" methods="3" coveredmethods="3"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="5" count="4" type="stmt"/>
+        <line num="6" count="4" type="stmt"/>
+        <line num="8" count="4" type="stmt"/>
+        <line num="9" count="4" type="stmt"/>
+        <line num="10" count="4" type="stmt"/>
+        <line num="13" count="4" type="stmt"/>
+        <line num="17" count="7" type="stmt"/>
+        <line num="19" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="23" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="24" count="3" type="stmt"/>
+        <line num="25" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="31" count="4" type="stmt"/>
+        <line num="34" count="7" type="stmt"/>
+        <line num="36" count="7" type="stmt"/>
+        <line num="40" count="7" type="stmt"/>
+        <line num="44" count="3" type="stmt"/>
+        <line num="45" count="3" type="stmt"/>
+        <line num="50" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="56" count="0" type="stmt"/>
+      </file>
+      <file name="validateUserData.ts" path="/home/joelrd01/Documents/programing/Backend/shortener-url/src/utils/validateUserData.ts">
+        <metrics statements="61" coveredstatements="49" conditionals="56" coveredconditionals="43" methods="3" coveredmethods="3"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="8" count="7" type="stmt"/>
+        <line num="27" count="7" type="cond" truecount="3" falsecount="1"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="32" count="7" type="stmt"/>
+        <line num="34" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="35" count="3" type="stmt"/>
+        <line num="39" count="4" type="stmt"/>
+        <line num="42" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="50" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="54" count="3" type="stmt"/>
+        <line num="55" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="56" count="0" type="stmt"/>
+        <line num="60" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="65" count="3" type="cond" truecount="3" falsecount="1"/>
+        <line num="66" count="0" type="stmt"/>
+        <line num="69" count="3" type="stmt"/>
+        <line num="78" count="1" type="stmt"/>
+        <line num="83" count="5" type="stmt"/>
+        <line num="86" count="5" type="stmt"/>
+        <line num="89" count="5" type="cond" truecount="3" falsecount="1"/>
+        <line num="90" count="0" type="stmt"/>
+        <line num="98" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="99" count="2" type="stmt"/>
+        <line num="103" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="104" count="0" type="stmt"/>
+        <line num="108" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="109" count="2" type="stmt"/>
+        <line num="113" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="114" count="2" type="stmt"/>
+        <line num="118" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="119" count="3" type="stmt"/>
+        <line num="123" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="124" count="0" type="stmt"/>
+        <line num="128" count="5" type="stmt"/>
+        <line num="134" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="135" count="1" type="stmt"/>
+        <line num="140" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="141" count="0" type="stmt"/>
+        <line num="142" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="143" count="2" type="stmt"/>
+        <line num="144" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="145" count="0" type="stmt"/>
+        <line num="147" count="3" type="stmt"/>
+        <line num="150" count="5" type="stmt"/>
+        <line num="162" count="1" type="stmt"/>
+        <line num="169" count="2" type="stmt"/>
+        <line num="177" count="2" type="stmt"/>
+        <line num="178" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="179" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="183" count="2" type="stmt"/>
+        <line num="184" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="185" count="1" type="stmt"/>
+        <line num="189" count="2" type="cond" truecount="3" falsecount="1"/>
+        <line num="190" count="0" type="stmt"/>
+        <line num="192" count="2" type="cond" truecount="3" falsecount="1"/>
+        <line num="193" count="0" type="stmt"/>
+        <line num="196" count="2" type="stmt"/>
       </file>
     </package>
   </project>

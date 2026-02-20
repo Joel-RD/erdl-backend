@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Regístrate o inicia sesión en Erdl.my para gestionar tus enlaces.">
+    <title>Erdl.my - Autenticación</title>
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+
+<body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="floating-particles" id="particles" aria-hidden="true"></div>
+
+    <main class="container_auth">
+        <section class="auth-box">
+            <header class="auth-header">
+                <h1>Erdl.my.</h1>
+                <p id="auth-subtitle">Crea tu cuenta o inicia sesión</p>
+            </header>
+
+            <div id="loginForm" class="form-container_auth active" role="tabpanel" aria-labelledby="login-tab">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            <input type="email" id="login-email" name="email" required
+                                placeholder="tu.nombre@ejemplo.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                            </svg>
+                            <input type="password" id="login-password" name="password" required
+                                placeholder="Mínimo 8 caracteres" autocomplete="current-password">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+                </form>
+            </div>
+
+            <div id="registerForm" class="form-container_auth" role="tabpanel" aria-labelledby="register-tab" hidden>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-name">Usuario</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg>
+                            <input type="text" id="register-name" name="username" required
+                                placeholder="Nombre de usuario" autocomplete="username">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            <input type="email" id="register-email" name="email" required
+                                placeholder="tu.nombre@ejemplo.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                            </svg>
+                            <input type="password" id="register-password" name="password" required
+                                placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirmar contraseña</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                            </svg>
+                            <input type="password" id="register-confirm-password" name="confirmPassword" required
+                                placeholder="Repite tu contraseña" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear cuenta</button>
+                </form>
+            </div>
+
+            <footer class="toggle-form">
+                <div class="toggle-separator" aria-hidden="true">
+                    <hr>
+                    <div class="dot"></div>
+                    <hr>
+                </div>
+                <p id="toggle-text"><a href="#" id="toggle-link">¿No tienes cuenta? Regístrate</a></p>
+            </footer>
+
+            <div id="alert-container" aria-live="assertive"></div>
+        </section>
+    </main>
+
+    <script src="/static/js/utils/particles.js"></script>
+    <script src="/static/js/utils/validation.js"></script>
+    <script src="/static/js/utils/cookieUtils.js"></script>
+    <script src="/static/js/auth.js"></script>
+</body>
+
+</html>

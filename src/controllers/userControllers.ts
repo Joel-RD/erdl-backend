@@ -1,6 +1,7 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { RequestModel as Request } from "../models/types.js"
 import { SnowflakeGenerator } from "../utils/snowflake.js"
-import { UserRepository } from "../repository/implementationDB/urlShortAnonimusRepository.js"
+import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
 import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
 import path from "path";
@@ -12,7 +13,7 @@ export class UserController {
     constructor(private userRepository: UserRepository) { }
 
     homeController = async (req: Request, res: Response) => {
-        res.sendFile(path.join(process.cwd(), "src", "public", "home.html"));
+        res.sendFile(path.join(process.cwd(), "public", "home.html"));
     }
 
     shortenerController = async (req: Request, res: Response) => {
@@ -22,12 +23,11 @@ export class UserController {
             if (!orig_url || typeof orig_url !== "string") {
                 return res.status(400).json({ message: "Debe ingresar una URL válida." });
             }
-            
+
             const snowflake = new SnowflakeGenerator(1);
             const urlID = snowflake.generateShortUrl();
 
             const short_url = await this.userRepository.create(urlID, orig_url);
-
 
             if (!short_url) {
                 return res
@@ -39,7 +39,7 @@ export class UserController {
 
             res.json({
                 message: "URL acortada con éxito.",
-                url_acortada: `${baseUrl}/${"short_url"}`,
+                url_acortada: `${baseUrl}/${urlID}`,
             });
 
         } catch (error) {
@@ -59,7 +59,7 @@ export class UserController {
             const originalUrl = await this.userRepository.findById(shortUrl);
 
             if (!originalUrl) {
-                return res.sendFile(path.join(process.cwd(), "src", "public", "error.html"));
+                return res.sendFile(path.join(process.cwd(), 'public', 'error.html'))
             }
 
             res.redirect(originalUrl);
@@ -69,6 +69,3 @@ export class UserController {
         }
     }
 }
-
-
-
