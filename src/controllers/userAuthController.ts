@@ -91,9 +91,9 @@ export class userAuthController {
 
             // const token = emailValidJWToken(email);
             // res.cookie("emailSendToVerifyUser", JSON.stringify({ token, email }), {
-            //     httpOnly: false,
-            //     secure: false,
-            //     sameSite: "lax",
+            //     httpOnly: true,
+            //     secure: true,
+            //     sameSite: "strict",
             //     maxAge: 60 * 2 * 1000,
             //     path: "/"
             // });
@@ -141,12 +141,12 @@ export class userAuthController {
             // await this.authControllerRepository.updateUsedVerificationCode(email);
             // const token = userAuthJWToken(email);
             // res.cookie("authTokenAuthorized", token, {
-            //     httpOnly: true,
-            //     secure: false,
-            //     sameSite: "lax",
-            //     maxAge: 7 * 24 * 60 * 60 * 1000,
-            //     path: '/'
-            // })
+            //      httpOnly: true,
+            //      secure: true,
+            //      sameSite: "strict",
+            //      maxAge: 7 * 24 * 60 * 60 * 1000,
+            //      path: '/'
+            //  })
             res.status(200).json({ message: "Login successful." });
         } catch (error) {
             console.error("Error in postAuthVerifyEmailController:", error);

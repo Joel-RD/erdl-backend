@@ -443,7 +443,7 @@ body::before {
 @media (max-width: 600px) {
     body {
         padding: 15px;
-        align-items: flex-start;
+        align-items: center;
         padding-top: 40px;
     }
 
