@@ -4,3 +4,5 @@ node_modules
 src/Database/databases.db
 /dist
 coverage
+assets/desing-shortener
+logs

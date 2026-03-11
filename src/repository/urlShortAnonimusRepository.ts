@@ -1,5 +1,6 @@
 import { IUserRepository } from "../models/types.js"
 import { Client } from "@libsql/client";
+import { log } from "../utils/logger.js";
 
 export class UserRepository implements IUserRepository {
     constructor(private DB: Client) { }
@@ -17,7 +18,7 @@ export class UserRepository implements IUserRepository {
 
             return result.rows[0].original_url as string;
         } catch (error) {
-            console.log(error)
+            log.error('Error en findById', { error });
             return null;
         }
     }
@@ -35,8 +36,8 @@ export class UserRepository implements IUserRepository {
 
             return short_url;
         } catch (error) {
-            console.log(error)
+            log.error('Error en create', { error });
             return null;
         }
     }
-}   
+}

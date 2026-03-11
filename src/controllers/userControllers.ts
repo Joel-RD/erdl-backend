@@ -1,9 +1,10 @@
 import { Response } from "express";
 import { RequestModel as Request } from "../models/types.js"
-import { SnowflakeGenerator } from "../utils/snowflake.js"
+import { NanoSnowflakeGenerator } from "../utils/snowflake.js"
 import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
 import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
+import { log } from "../utils/logger.js";
 import path from "path";
 
 const userRepository = new UserRepository(turso);
@@ -24,26 +25,25 @@ export class UserController {
                 return res.status(400).json({ message: "Debe ingresar una URL válida." });
             }
 
-            const snowflake = new SnowflakeGenerator(1);
+            const snowflake = new NanoSnowflakeGenerator(1);
             const urlID = snowflake.generateShortUrl();
 
-            const short_url = await this.userRepository.create(urlID, orig_url);
+            // const short_url = await this.userRepository.create(urlID, orig_url);
 
-            if (!short_url) {
-                return res
-                    .status(500)
-                    .json({
-                        message: "Error al crear la URL acortada.",
-                    })
-            }
+            // if (!short_url) {
+            //     return res
+            //         .status(500)
+            //         .json({
+            //             message: "Error al crear la URL acortada.",
+            //         })
+            // }
 
             res.json({
                 message: "URL acortada con éxito.",
                 url_acortada: `${baseUrl}/${urlID}`,
             });
-
         } catch (error) {
-            console.log(error);
+            log.error('Error en shortenerController', { error });
             res.status(500).json({ message: "Error al acortar la URL." });
         }
     }
@@ -64,7 +64,7 @@ export class UserController {
 
             res.redirect(originalUrl);
         } catch (error) {
-            console.log(error);
+            log.error('Error en redirectShortController', { error });
             res.status(500).json({ message: "Error al redirigir la URL." });
         }
     }

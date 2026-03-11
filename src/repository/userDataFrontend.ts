@@ -1,5 +1,6 @@
 import { IUserDataFrontendRepository } from "../models/types.js";
 import { Client } from "@libsql/client"
+import { log } from "../utils/logger.js";
 
 export class UserDataFrontendRepository implements IUserDataFrontendRepository {
     constructor(private db: Client) { }
@@ -40,7 +41,7 @@ export class UserDataFrontendRepository implements IUserDataFrontendRepository {
             const user = result.rows[0];
             return JSON.stringify(user);
         } catch (error) {
-            console.log('Error getDataUser on userDataFrontendRepository: ', error);
+            log.error('Error en getDataUser', { error });
             return false;
         }
     }

@@ -8,7 +8,7 @@ describe('Password Encrypt Utils', () => {
             const hash = await hashPassword(password);
 
             expect(hash).not.toBe(password);
-            expect(hash).toMatch(/^\$2[ayb]\$.{56}$/); // Basic bcrypt hash regex
+            expect(hash).toMatch(/^\$2[ayb]\$.{56}$/);
         });
     });
 
