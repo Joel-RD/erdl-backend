@@ -5,17 +5,12 @@ import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
 import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
 import { log } from "../utils/logger.js";
-import path from "path";
 
 const userRepository = new UserRepository(turso);
 const { baseUrl } = config;
 
 export class UserController {
     constructor(private userRepository: UserRepository) { }
-
-    homeController = async (req: Request, res: Response) => {
-        res.sendFile(path.join(process.cwd(), "public", "home.html"));
-    }
 
     shortenerController = async (req: Request, res: Response) => {
         try {
@@ -28,15 +23,15 @@ export class UserController {
             const snowflake = new NanoSnowflakeGenerator(1);
             const urlID = snowflake.generateShortUrl();
 
-            // const short_url = await this.userRepository.create(urlID, orig_url);
+            const short_url = await this.userRepository.create(urlID, orig_url);
 
-            // if (!short_url) {
-            //     return res
-            //         .status(500)
-            //         .json({
-            //             message: "Error al crear la URL acortada.",
-            //         })
-            // }
+            if (!short_url) {
+                return res
+                    .status(500)
+                    .json({
+                        message: "Error al crear la URL acortada.",
+                    })
+            }
 
             res.json({
                 message: "URL acortada con éxito.",
@@ -59,7 +54,10 @@ export class UserController {
             const originalUrl = await this.userRepository.findById(shortUrl);
 
             if (!originalUrl) {
-                return res.sendFile(path.join(process.cwd(), 'public', 'error.html'))
+                return res.status(404).json({ 
+                    error: "Not Found",
+                    message: "URL acortada no encontrada." 
+                })
             }
 
             res.redirect(originalUrl);
