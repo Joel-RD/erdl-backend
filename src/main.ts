@@ -1,10 +1,8 @@
-import express, { NextFunction, Response } from "express";
-import { RequestModel as Request } from "./models/types.js"
+import express, { NextFunction, Request, Response } from "express";
 import { config } from "./config.js";
 import usersRouter from "./routers/usersRouters.js";
 import userAuthRouter from "./routers/userAuthRouter.js";
 import userProtectedAuthorized from "./routers/userProtectedAuthorized.js";
-import path from "path";
 import morgan from "morgan";
 import cors from "cors"
 import cookieParser from "cookie-parser"
@@ -20,7 +18,6 @@ app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/static', express.static(path.join(process.cwd(), "public")));
 
 app.use(morgan("dev"));
 app.use(usersRouter);
@@ -28,8 +25,19 @@ app.use(usersRouter);
 app.use('/api/v1/', userAuthRouter);
 app.use('/api/v1/', userProtectedAuthorized)
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(404).sendFile(path.join(process.cwd(), "public", "error.html"));
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ 
+    error: "Not Found",
+    message: `Route ${req.method} ${req.path} not found` 
+  });
 });
 
-export default app;     
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ 
+    error: "Internal Server Error",
+    message: "An unexpected error occurred" 
+  });
+});
+
+export default app;

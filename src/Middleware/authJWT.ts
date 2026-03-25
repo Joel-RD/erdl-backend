@@ -9,15 +9,16 @@ export function authJWT(req: Request, res: Response, next: NextFunction) {
   const tokenCookies = req.cookies.authTokenAuthorized;
 
   if (!tokenCookies) {
-    return res.redirect("/api/v1/auth");
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
   const token = tokenCookies;
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.redirect("/api/v1/auth");
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
+    req.userEmail = (decoded as any).email;
     next();
   });
 }
@@ -25,7 +26,7 @@ export function authJWT(req: Request, res: Response, next: NextFunction) {
 export async function verifySendToEmail(req: Request, res: Response, next: NextFunction) {
 
   if (!req.cookies.emailSendToVerifyUser) {
-    res.redirect("/api/v1/auth");
+    res.status(401).json({ message: "Unauthorized: No verification session" });
     return
   }
 
@@ -33,29 +34,15 @@ export async function verifySendToEmail(req: Request, res: Response, next: NextF
   const tokenValidEmail = tokenParser.token
 
   if (!tokenValidEmail) {
-    res.redirect("/api/v1/auth");
+    res.status(401).json({ message: "Unauthorized: No verification token" });
     return
   }
   const token = tokenValidEmail;
   jwt.verify(token as string, JWT_SECRET, (err, decoded) => {
     if (err) {
-      res.redirect("/api/v1/auth")
+      res.status(401).json({ message: "Unauthorized: Invalid verification token" })
       return
     }
     next();
   });
 }
-
-export function redirectIfAuthenticated(req: Request, res: Response, next: NextFunction) {
-  const tokenCookies = req.cookies.authTokenAuthorized;
-  if (!tokenCookies) {
-    return next();
-  }
-
-  jwt.verify(tokenCookies, JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return next();
-    }
-    return res.redirect("/api/v1/auth/user/profile");
-  });
-} 

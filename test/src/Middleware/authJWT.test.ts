@@ -21,7 +21,6 @@ describe('Middleware: authJWT', () => {
             query: {}
         };
         res = {
-            redirect: jest.fn(),
             status: jest.fn().mockReturnThis(),
             json: jest.fn()
         };
@@ -30,40 +29,42 @@ describe('Middleware: authJWT', () => {
     });
 
     describe('authJWT', () => {
-        it('should redirect if no auth token in cookies', () => {
+        it('should return 401 if no auth token in cookies', () => {
             authJWT(req as Request, res as Response, next);
-            expect(res.redirect).toHaveBeenCalledWith('/api/v1/auth');
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: No token provided" });
             expect(next).not.toHaveBeenCalled();
         });
 
         it('should call next() if token is valid', () => {
             req.cookies = { authTokenAuthorized: 'valid-token' };
             (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-                callback(null, { userId: '123' });
+                callback(null, { userId: '123', email: 'test@test.com' });
             });
 
             authJWT(req as Request, res as Response, next);
             expect(jwt.verify).toHaveBeenCalledWith('valid-token', 'test-secret', expect.any(Function));
             expect(next).toHaveBeenCalled();
-            expect(res.redirect).not.toHaveBeenCalled();
         });
 
-        it('should redirect if token is invalid', () => {
+        it('should return 401 if token is invalid', () => {
             req.cookies = { authTokenAuthorized: 'invalid-token' };
             (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
                 callback(new Error('Invalid token'), null);
             });
 
             authJWT(req as Request, res as Response, next);
-            expect(res.redirect).toHaveBeenCalledWith('/api/v1/auth');
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Invalid token" });
             expect(next).not.toHaveBeenCalled();
         });
     });
 
     describe('verifySendToEmail', () => {
-        it('should redirect if no token in cookies', () => {
+        it('should return 401 if no token in cookies', () => {
             verifySendToEmail(req as Request, res as Response, next);
-            expect(res.redirect).toHaveBeenCalledWith('/api/v1/auth');
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: No verification session" });
         });
 
         it('should call next() if token is valid', () => {
@@ -76,14 +77,15 @@ describe('Middleware: authJWT', () => {
             expect(next).toHaveBeenCalled();
         });
 
-        it('should redirect if token is invalid', () => {
+        it('should return 401 if token is invalid', () => {
             req.cookies = { emailSendToVerifyUser: JSON.stringify({ token: 'invalid-token' }) };
             (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
                 callback(new Error('Invalid token'), null);
             });
 
             verifySendToEmail(req as Request, res as Response, next);
-            expect(res.redirect).toHaveBeenCalledWith('/api/v1/auth');
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Invalid verification token" });
         });
     });
 });

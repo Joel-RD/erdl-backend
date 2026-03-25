@@ -1,6 +1,6 @@
-# 🔗 Shortener URL
+# 🔗 Shortener URL API
 
-A robust and scalable URL shortener built with **Node.js**, **Express**, and **LibSQL (Turso)**. It features a custom **Snowflake ID** generator for unique, sortable IDs and includes a full user authentication system with email verification.
+A robust and scalable URL shortener API built with **Node.js**, **Express**, and **LibSQL (Turso)**. It features a custom **Snowflake ID** generator for unique, sortable IDs and includes a full user authentication system with email verification.
 
 ---
 
@@ -27,7 +27,7 @@ A robust and scalable URL shortener built with **Node.js**, **Express**, and **L
 - **Database**: [LibSQL / Turso](https://turso.tech/)
 - **Authentication**: [JWT](https://jwt.io/) & [Bcryptjs](https://www.npmjs.com/package/bcryptjs)
 - **Email**: [Nodemailer](https://nodemailer.com/)
-- **Utilities**: [Zod](https://zod.dev/) (Validation), [Morgan](https://www.npmjs.com/package/morgan) (Logging)
+- **Utilities**: [Morgan](https://www.npmjs.com/package/morgan) (Logging)
 
 ---
 
@@ -40,9 +40,9 @@ src/
 ├── routers/        # API Documentation & Route definitions
 ├── repository/     # Database access layer
 ├── services/       # Business logic (e.g., Email Service)
-├── Middleware/     # Auth checks, Rate limiting
+├── middleware/     # Auth checks, Rate limiting
 ├── utils/          # Helpers (Snowflake Generator, validation)
-├── Database/       # DB connection setup
+├── database/       # DB connection setup
 ├── config.ts       # Environment configuration
 ├── main.ts         # App initialization & Middleware setup
 └── run.ts          # Server entry point
@@ -58,7 +58,6 @@ src/
 - npm or pnpm
 - A Turso database URL and Auth Token (or local SQLite file)
 - Gmail account (for email sending) or SMTP credentials
-- Redis server (for rate limiting)
 
 ### Installation
 
@@ -100,6 +99,8 @@ src/
 
 ## 📡 API Reference
 
+All endpoints return JSON responses.
+
 ### 🔗 URL Shortener
 
 | Method | Endpoint        | Description                              | Body Example                         |
@@ -107,17 +108,85 @@ src/
 | `POST` | `/api/v1/short` | Shorten a new URL                        | `{ "orig_url": "https://google.com"}` |
 | `GET`  | `/:shortUrl`    | Redirect to original URL (e.g. `/a7X2k`) | N/A                                  |
 
+**Response Examples:**
+
+```json
+// POST /api/v1/short
+// Success (201)
+{
+  "message": "URL acortada con éxito.",
+  "url_acortada": "http://localhost:3000/a7X2k"
+}
+
+// GET /:shortUrl
+// Redirects to the original URL (302)
+```
+
 ### 🔐 Authentication
 
 | Method | Endpoint              | Description                                      |
 | :----- | :-------------------- | :----------------------------------------------- |
-| `POST` | `/auth/register`      | Register a new user                              |
-| `POST` | `/auth/login`         | Login and receive HttpOnly cookie                |
-| `GET`  | `/auth/verify-email`  | Verify email address (via link code)             |
-| `POST` | `/auth/verify-email`  | Resend verification email                        |
-| `GET`  | `/auth`               | Check auth status                                |
-| `GET`  | `/home`               | Home page (Redirects if authenticated)           |
-| `GET`  | `/auth/user/profile`  | **Protected**. Get user profile (Requires Login) |
+| `POST` | `/api/v1/auth/register` | Register a new user                              |
+| `POST` | `/api/v1/auth/login`    | Login and receive HttpOnly cookie                |
+| `POST` | `/api/v1/auth/verify-email` | Verify email with code                    |
+| `GET`  | `/api/v1/auth/user/profile` | **Protected**. Get user profile        |
+
+**Request/Response Examples:**
+
+```json
+// POST /api/v1/auth/register
+// Request
+{
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "securepassword123"
+}
+
+// Response (201)
+{
+  "message": "User created successfully."
+}
+
+// POST /api/v1/auth/login
+// Request
+{
+  "email": "john@example.com",
+  "password": "securepassword123"
+}
+
+// Response (200)
+{
+  "message": "Login successful."
+}
+
+// GET /api/v1/auth/user/profile
+// Headers: Cookie: authTokenAuthorized=<token>
+// Response (200)
+{
+  "message": "Profile accessed successfully",
+  "user": {
+    "email": "john@example.com"
+  }
+}
+```
+
+### ❌ Error Responses
+
+All errors follow this format:
+
+```json
+{
+  "error": "Error Type",
+  "message": "Descriptive error message"
+}
+```
+
+Common status codes:
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized (invalid/missing token)
+- `404` - Not Found
+- `429` - Too Many Requests (rate limit exceeded)
+- `500` - Internal Server Error
 
 ---
 
@@ -127,6 +196,7 @@ src/
 - `npm run build`: Compile TypeScript to JavaScript.
 - `npm start`: Run the built application.
 - `npm run snowflake`: Run a demo of the Snowflake ID generator.
+- `npm test`: Run test suite.
 
 ---
 
