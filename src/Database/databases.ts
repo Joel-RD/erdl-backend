@@ -3,6 +3,7 @@ import { config } from "../config.js";
 import path from "path"
 
 const { db_turso } = config;
-const turso_connect = await config.db_turso(path.join("file:", process.cwd(), "src", "Database", "databases.db"));
+const local_db_path = path.join("file:", process.cwd(), "src", "Database", "databases.db");
+const turso_connect = await config.db_turso(local_db_path);
 
 export const turso = createClient(turso_connect);   

@@ -1,6 +1,7 @@
 
 import dotenv from "dotenv";
 import { ConfigCookiesParams } from "./models/types.js"
+
 dotenv.config();
 
 const { NODE_ENV, JWT_SECRET, DB_TURSO_URL, DB_TURSO_AUTH_TOKEN, PORT, DOMAIN_FOR_FRONTEND, EMAIL_USER, EMAIL_PASS, EMAIL_HOST, EMAIL_PORT, EMAIL_SECURE, HTTP_ONLY, SECURE, SAME_SITE, MAX_AGE, PATH, EAMIL_VALID_JWT_SECRE } = process.env;
@@ -24,10 +25,16 @@ export const config = {
         emailPort: EMAIL_PORT || '',
         emailSecure: EMAIL_SECURE || '',
     }),
-    db_turso: async (local_file_path?: string, auth_token?: string) => {
+    db_turso: async (local_file_path?: string) => {
+        const isProduction = NODE_ENV?.toLowerCase() === 'production';
+        if (!isProduction) {
+            return {
+                url: local_file_path,
+            }
+        }
         return {
-            url: NODE_ENV !== 'Production' ? local_file_path : DB_TURSO_URL,
-            authToken: NODE_ENV !== 'Production' ? auth_token : DB_TURSO_AUTH_TOKEN
+            url: DB_TURSO_URL,
+            authToken: DB_TURSO_AUTH_TOKEN
         }
     }
 }; 
