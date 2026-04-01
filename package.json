@@ -9,13 +9,15 @@
     "build": "tsc",
     "start": "node dist/src/run.js",
     "test": "jest",
-    "snowflake": "tsx src/utils/snowflake.ts"
+    "stress": "STRESS_TEST=true tsx ./test/stress/stress-tester.ts",
+    "stress:full": "NODE_ENV=production STRESS_TEST=true tsx ./test/stress/stress-tester.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@libsql/client": "^0.17.0",
+    "@types/autocannon": "^7.12.7",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cookie-parser": "^1.4.10",
@@ -28,11 +30,11 @@
     "@types/morgan": "^1.9.10",
     "@types/nodemailer": "^7.0.9",
     "@types/supertest": "^6.0.3",
+    "autocannon": "^8.0.0",
     "jest": "^30.2.0",
     "morgan": "^1.10.1",
     "nodemon": "^3.1.11",
     "supertest": "^7.2.2",
-    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
@@ -47,6 +49,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.3",
+    "nanoid": "^3.3.11",
     "nodemailer": "^7.0.13",
     "winston": "^3.19.0"
   }

@@ -6,7 +6,7 @@ A robust and scalable URL shortener API built with **Node.js**, **Express**, and
 
 ## 🚀 Features
 
-- **Custom ID Generation**: Uses a Snowflake algorithm (Timestamp + Machine ID + Sequence) combined with Base62 encoding for short, unique URLs (e.g., `a7X2k`).
+- **Custom ID Generation**: Uses the [nanoid](https://github.com/ai/nanoid) library to generate short, secure, and unique URL identifiers (e.g., `V1StGXR8`).
 - **User Authentication**: Secure JWT-based authentication with HttpOnly cookies.
   - Register & Login.
   - Email Verification (Nodemailer).
@@ -41,7 +41,7 @@ src/
 ├── repository/     # Database access layer
 ├── services/       # Business logic (e.g., Email Service)
 ├── middleware/     # Auth checks, Rate limiting
-├── utils/          # Helpers (Snowflake Generator, validation)
+├── utils/          # Helpers (nanoid ID Generator, validation)
 ├── database/       # DB connection setup
 ├── config.ts       # Environment configuration
 ├── main.ts         # App initialization & Middleware setup
@@ -195,7 +195,6 @@ Common status codes:
 - `npm run dev`: Start development server with Nodemon.
 - `npm run build`: Compile TypeScript to JavaScript.
 - `npm start`: Run the built application.
-- `npm run snowflake`: Run a demo of the Snowflake ID generator.
 - `npm test`: Run test suite.
 
 ---

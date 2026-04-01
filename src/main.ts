@@ -19,7 +19,9 @@ app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(morgan("dev"));
+if (config.nodeEnv !== 'production' && process.env.SKIP_LOGS !== 'true') {
+  app.use(morgan("dev"));
+}
 app.use(usersRouter);
 
 app.use('/api/v1/', userAuthRouter);
