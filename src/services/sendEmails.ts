@@ -1,8 +1,6 @@
 import nodemailer, { TransportOptions } from "nodemailer";
 import { config } from "../config.js";
-import { generateVerificationCode } from "../utils/codeValidatedEmail.js";
 
-export const codeGenerate = generateVerificationCode();
 const {configSendEmail} = config;
 
 const templateEmailHtml = (code: string) => {

@@ -84,15 +84,26 @@ export class userAuthController {
                 return res.status(400).json({ message: "Invalid password." });
             }
 
+            const activeCode = await this.authControllerRepository.getActiveVerificationCode(email);
+            if (activeCode) {
+                const expiresAt = new Date(activeCode.expires_at);
+                const now = new Date();
+                const minutesLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / 60000);
+                return res.status(429).json({ 
+                    message: "Ya hay un código de verificación activo.", 
+                    remainingMinutes: minutesLeft 
+                });
+            }
+
             const token = emailValidJWToken(email);
-            res.cookie("emailSendToVerifyUser", JSON.stringify({ token, email }), {
-                httpOnly: true,
-                secure: true,
-                sameSite: "strict",
-                maxAge: 60 * 2 * 1000,
-                path: "/"
-            });
-            res.status(200).json({ message: "Login successful." });
+            const validCode = generateVerificationCode();
+            await this.authControllerRepository.savedVerificationCode(email, validCode);
+            sendVerificationEmail(email, validCode);
+            res.status(200).json({ message: "Login successful", user: {
+                id: user.id,
+                username: user.name,
+                email: user.email
+            } });
         } catch (error) {
             console.error("Error in authLoginController:", error);
             res.status(500).json({ message: "Error in login process." });
@@ -101,21 +112,17 @@ export class userAuthController {
 
     postAuthVerifyEmailController = async (req: Request, res: Response) => {
         try {
-            const dataCookies = JSON.parse(req.cookies['emailSendToVerifyUser']);
-            const { code } = req.body;
-            const email = dataCookies.email;
-
+            const { code, email } = req.body;
             if (!email) {
                 return res.status(400).json({ message: "Email is required." });
+            }
+            if (!code) {
+                return res.status(400).json({ message: "Code is required." });
             }
 
             const user = await this.authControllerRepository.findByEmail(email);
             if (!user) {
                 return res.status(400).json({ message: "User not found." });
-            }
-
-            if (!code) {
-                return res.status(400).json({ message: "Code is required." });
             }
 
             const codeMatch = await this.authControllerRepository.verifyVerificationCode(email, code);
@@ -126,12 +133,13 @@ export class userAuthController {
             await this.authControllerRepository.updateUsedVerificationCode(email);
             const token = userAuthJWToken(email);
             res.cookie("authTokenAuthorized", token, {
-                 httpOnly: true,
-                 secure: true,
-                 sameSite: "strict",
-                 maxAge: 7 * 24 * 60 * 60 * 1000,
-                 path: '/'
-             })
+                httpOnly: true,
+                secure: true,
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: '/'
+            });
+            
             res.status(200).json({ message: "Login successful." });
         } catch (error) {
             console.error("Error in postAuthVerifyEmailController:", error);

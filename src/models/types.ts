@@ -35,8 +35,5 @@ export interface IUserAuthRepository {
     savedVerificationCode(email: string, code: string): Promise<boolean>;
     verifyVerificationCode(email: string, code: string): Promise<boolean>;
     updateUsedVerificationCode(email: string): Promise<boolean>;
-}
-
-export interface IUserDataFrontendRepository {
-    getDataUser(email: string): Promise<string | boolean>;
+    getActiveVerificationCode(email: string): Promise<any | null>;
 }

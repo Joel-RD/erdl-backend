@@ -74,4 +74,18 @@ export class AuthRepository implements IUserAuthRepository {
             return false;
         }
     }
+
+    async getActiveVerificationCode(email: string): Promise<any | null> {
+        try {
+            const result = await this.DB.execute({
+                sql: `SELECT * FROM verification_codes 
+                      WHERE email = ? AND used = 0 AND expires_at > DATETIME('now')`,
+                args: [email]
+            });
+            return result.rows[0] || null;
+        } catch (error) {
+            console.error("Error getting active verification code:", error);
+            return null;
+        }
+    }
 }

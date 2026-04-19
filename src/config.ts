@@ -7,6 +7,7 @@ const { NODE_ENV, JWT_SECRET, DB_TURSO_URL, DB_TURSO_AUTH_TOKEN, PORT, DOMAIN_FO
 
 export const config = {
     port: PORT || 3000,
+    isProduction: NODE_ENV === "production" ? true : false,
     baseUrl: DOMAIN_FOR_FRONTEND || "http://localhost:3000",
     jwtSecret: JWT_SECRET || "default_secret_key_for_development_only",
     nodeEnv: NODE_ENV,
@@ -31,3 +32,6 @@ export const config = {
         }
     }
 }; 
+
+console.info(config.isProduction) 
+console.info(!config.isProduction ? 200000 : 50000) 

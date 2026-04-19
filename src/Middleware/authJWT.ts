@@ -23,26 +23,23 @@ export function authJWT(req: Request, res: Response, next: NextFunction) {
   });
 }
 
-export async function verifySendToEmail(req: Request, res: Response, next: NextFunction) {
+const JWT_SECRET_EMAIL = config.jwtSecret;
 
-  if (!req.cookies.emailSendToVerifyUser) {
-    res.status(401).json({ message: "Unauthorized: No verification session" });
-    return
+export function verifySendToEmail(req: Request, res: Response, next: NextFunction) {
+  const tokenCookies = req.cookies.emailSendToVerifyUser;
+
+  if (!tokenCookies) {
+    return res.status(401).json({ message: "Unauthorized: No verification session" });
   }
 
-  const tokenParser = JSON.parse(req.cookies.emailSendToVerifyUser)
-  const tokenValidEmail = tokenParser.token
+  const parsed = JSON.parse(tokenCookies);
+  const token = parsed.token;
 
-  if (!tokenValidEmail) {
-    res.status(401).json({ message: "Unauthorized: No verification token" });
-    return
-  }
-  const token = tokenValidEmail;
-  jwt.verify(token as string, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, JWT_SECRET_EMAIL, (err, decoded) => {
     if (err) {
-      res.status(401).json({ message: "Unauthorized: Invalid verification token" })
-      return
+      return res.status(401).json({ message: "Unauthorized: Invalid verification token" });
     }
+    req.userEmail = (decoded as any).email;
     next();
   });
 }
