@@ -31,7 +31,4 @@ export const config = {
             authToken: NODE_ENV !== 'Production' ? auth_token : DB_TURSO_AUTH_TOKEN
         }
     }
-}; 
-
-console.info(config.isProduction) 
-console.info(!config.isProduction ? 200000 : 50000) 
+};

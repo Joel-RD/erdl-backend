@@ -1,6 +1,6 @@
 import { rateLimit, ipKeyGenerator } from 'express-rate-limit'
 import { Request, Response } from 'express'
-import { config } from '../config';
+import { config } from '../config.js';
 
 export const redirectShort = rateLimit({
     windowMs: 24 * 60 * 60 * 1000,
