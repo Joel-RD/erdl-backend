@@ -1,11 +1,10 @@
-import { Response } from "express";
+import { Response, Request } from "express";
 import { AuthRepository } from "../repository/userAuthRepository.js"
 import { sendVerificationEmail } from "../services/sendEmails.js"
 import { turso } from "../Database/databases.js"
 import { validateRegistration } from "../utils/validateUserData.js"
 import { hashPassword, comparePassword } from "../utils/password_encrypt.js"
 import { generateVerificationCode } from "../utils/codeValidatedEmail.js"
-import { RequestModel as Request } from "../models/types.js"
 import { config } from "../config.js"
 import { emailValidJWToken, userAuthJWToken } from "../utils/jwt.js"
 

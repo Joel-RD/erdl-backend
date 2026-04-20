@@ -1,6 +1,6 @@
-import { Request } from "express";
+import type { Request } from "express";
 
-export interface RequestModel extends Request {
+export type RequestModel = Request & {
     userEmail?: string
 }
 

@@ -14,7 +14,7 @@ export function authJWT(req: Request, res: Response, next: NextFunction) {
 
   const token = tokenCookies;
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
     if (err) {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
