@@ -1,5 +1,9 @@
 import type { Request } from "express";
 
+export type RequestModel = Request & {
+    userEmail?: string
+}
+
 export interface ConfigCookiesParams {
     httpOnly: boolean;
     secure: boolean;
