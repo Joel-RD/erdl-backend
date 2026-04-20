@@ -1,5 +1,4 @@
-import { Response } from "express";
-import { RequestModel as Request } from "../models/types.js"
+import { Response, Request } from "express";
 import { NanoSnowflakeGenerator } from "../utils/snowflake.js"
 import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
 import { turso } from "../Database/databases.js"
