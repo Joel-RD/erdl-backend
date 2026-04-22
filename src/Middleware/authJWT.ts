@@ -14,7 +14,7 @@ export function authJWT(req: Request, res: Response, next: NextFunction) {
 
   const token = tokenCookies;
 
-  jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
+  jwt.verify(token, JWT_SECRET, (err: unknown, decoded: unknown) => {
     if (err) {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
@@ -38,7 +38,7 @@ export async function verifySendToEmail(req: Request, res: Response, next: NextF
     return
   }
   const token = tokenValidEmail;
-  jwt.verify(token as string, JWT_SECRET, (err: any, decoded: any) => {
+  jwt.verify(token as string, JWT_SECRET, (err: unknown, decoded: unknown) => {
     if (err) {
       res.status(401).json({ message: "Unauthorized: Invalid verification token" })
       return
