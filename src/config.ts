@@ -24,10 +24,13 @@ export const config = {
         emailPort: EMAIL_PORT || '',
         emailSecure: EMAIL_SECURE || '',
     }),
-    db_turso: async (local_file_path?: string, auth_token?: string) => {
+    db_turso: async (local_file_path?: string) => {
+        if (NODE_ENV !== "Production") {
+            return { url: local_file_path! }
+        }
         return {
-            url: NODE_ENV !== 'Production' ? local_file_path : DB_TURSO_URL,
-            authToken: NODE_ENV !== 'Production' ? auth_token : DB_TURSO_AUTH_TOKEN
+            url: DB_TURSO_URL!,
+            authToken: DB_TURSO_AUTH_TOKEN
         }
     }
 }; 

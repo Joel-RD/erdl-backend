@@ -7,7 +7,7 @@ const appDirname = isESM
   ? path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Z]:)/, '$1')
   : process.cwd();
 
-const isProduction = process.env.NODE_ENV === 'Production' || process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'Production';
 
 // Formato para desarrollo - legible y con colores
 const devFormat = winston.format.combine(

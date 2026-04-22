@@ -38,7 +38,7 @@ export async function verifySendToEmail(req: Request, res: Response, next: NextF
     return
   }
   const token = tokenValidEmail;
-  jwt.verify(token as string, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token as string, JWT_SECRET, (err: any, decoded: any) => {
     if (err) {
       res.status(401).json({ message: "Unauthorized: Invalid verification token" })
       return
