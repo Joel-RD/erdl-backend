@@ -16,7 +16,7 @@ export class UserController {
             const { orig_url } = req.body;
 
             if (!orig_url || typeof orig_url !== "string") {
-                return res.status(400).json({ message: "Debe ingresar una URL válida." });
+                return res.status(401).json({ message: "Debe ingresar una URL válida." });
             }
 
             const snowflake = new NanoSnowflakeGenerator(1);
@@ -47,7 +47,7 @@ export class UserController {
             const { shortUrl } = req.params;
 
             if (!shortUrl || typeof shortUrl !== "string") {
-                return res.status(400).json({ message: "Debe ingresar una URL válida." });
+                return res.status(401).json({ message: "Debe ingresar una URL válida." });
             }
 
             const originalUrl = await this.userRepository.findById(shortUrl);

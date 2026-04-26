@@ -19,14 +19,14 @@ export class userAuthController {
         try {
             if (!req.body) {
                 console.error("authRegisterController: req.body is undefined");
-                return res.status(400).json({ message: "Request body is missing" });
+                return res.status(409).json({ message: "Request body is missing" });
             }
 
             const { username, email, password } = req.body;
             const validation = validateRegistration({ username, email, password });
 
             if (!validation.isValid) {
-                return res.status(400).json({
+                return res.status(401).json({
                     message: "Validation failed",
                     errors: validation.errors
                 });
@@ -34,7 +34,7 @@ export class userAuthController {
 
             const existingEmail = await this.authControllerRepository.findByEmail(email);
             if (existingEmail) {
-                return res.status(400).json({ message: "Email already in use." });
+                return res.status(409).json({ message: "Email already in use" });
             }
 
             const passwordHash = await hashPassword(password);
@@ -45,29 +45,29 @@ export class userAuthController {
             });
 
             if (!success) {
-                return res.status(500).json({ message: "Error creating user." });
+                return res.status(500).json({ message: "Error creating user" });
             }
 
             res.status(201).json({
-                message: "User created successfully."
+                message: "User created successfully"
             });
         } catch (error) {
-            console.error("Error in creater user processing:", error);
-            res.status(500).json({ message: "Error al crear el usuario." });
+            console.error("Error in creater user processing: ", error);
+            res.status(500).json({ message: "Error al crear el usuario" });
         }
     }
 
     authLoginController = async (req: Request, res: Response) => {
         try {
             if (!req.body) {
-                return res.status(400).json({ message: "Request body is missing" });
+                return res.status(409).json({ message: "Request body is missing" });
             }
 
             const { email, password } = req.body;
             const validation = validateRegistration({ email, password });
 
             if (!validation.isValid) {
-                return res.status(400).json({
+                return res.status(401).json({
                     message: "Validation failed",
                     errors: validation.errors
                 });
@@ -75,12 +75,12 @@ export class userAuthController {
 
             const user = await this.authControllerRepository.findByEmail(email);
             if (!user) {
-                return res.status(400).json({ message: "User not found." });
+                return res.status(404).json({ message: "User not found." });
             }
 
             const passwordMatch = await comparePassword(password, user.password_hash);
             if (!passwordMatch) {
-                return res.status(400).json({ message: "Invalid password." });
+                return res.status(401).json({ message: "Invalid password." });
             }
 
             const activeCode = await this.authControllerRepository.getActiveVerificationCode(email);
@@ -112,21 +112,18 @@ export class userAuthController {
     postAuthVerifyEmailController = async (req: Request, res: Response) => {
         try {
             const { code, email } = req.body;
-            if (!email) {
-                return res.status(400).json({ message: "Email is required." });
-            }
-            if (!code) {
-                return res.status(400).json({ message: "Code is required." });
+            if (!email || !code) {
+                return res.status(400).json({ message: "Code or Email is required." });
             }
 
             const user = await this.authControllerRepository.findByEmail(email);
             if (!user) {
-                return res.status(400).json({ message: "User not found." });
+                return res.status(404).json({ message: "User not found." });
             }
 
             const codeMatch = await this.authControllerRepository.verifyVerificationCode(email, code);
             if (!codeMatch) {
-                return res.status(400).json({ message: "Invalid code." });
+                return res.status(404).json({ message: "Invalid code." });
             }
             
             await this.authControllerRepository.updateUsedVerificationCode(email);
