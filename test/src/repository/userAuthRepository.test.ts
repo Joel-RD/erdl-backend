@@ -4,11 +4,11 @@ import { Client } from '@libsql/client';
 
 describe('AuthRepository', () => {
     let repository: AuthRepository;
-    let mockExecute: jest.Mock;
+    let mockExecute: jest.MockedFunction<Client['execute']>;
     let mockClient: Client;
 
     beforeEach(() => {
-        mockExecute = jest.fn();
+        mockExecute = jest.fn() as jest.MockedFunction<Client['execute']>;
         mockClient = {
             execute: mockExecute
         } as unknown as Client;
@@ -18,7 +18,7 @@ describe('AuthRepository', () => {
     describe('findByEmail', () => {
         it('should return user if found', async () => {
             const mockUser = { id: 1, email: 'test@example.com' };
-            mockExecute.mockResolvedValue({ rows: [mockUser] });
+            mockExecute.mockResolvedValue({ rows: [mockUser] } as any);
 
             const result = await repository.findByEmail('test@example.com');
             expect(mockExecute).toHaveBeenCalledWith(expect.objectContaining({
@@ -29,7 +29,7 @@ describe('AuthRepository', () => {
         });
 
         it('should return null if user not found', async () => {
-            mockExecute.mockResolvedValue({ rows: [] });
+            mockExecute.mockResolvedValue({ rows: [] } as any);
 
             const result = await repository.findByEmail('notfound@example.com');
             expect(result).toBeNull();
@@ -38,7 +38,7 @@ describe('AuthRepository', () => {
 
     describe('create', () => {
         it('should return true on successful creation', async () => {
-            mockExecute.mockResolvedValue({ rows: [] }); // Insert usually returns empty rows but succeeds
+            mockExecute.mockResolvedValue({ rows: [] } as any); // Insert usually returns empty rows but succeeds
             const newUser = { username: 'test', email: 'test@test.com', passwordHash: 'hash' };
 
             const result = await repository.create(newUser);
