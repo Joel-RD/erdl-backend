@@ -1,5 +1,5 @@
 import { Response, Request } from "express";
-import { NanoSnowflakeGenerator } from "../utils/snowflake.js"
+import { generateShortUrl } from "../utils/shortId.js"
 import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
 import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
@@ -19,9 +19,7 @@ export class UserController {
                 return res.status(401).json({ message: "Debe ingresar una URL válida." });
             }
 
-            const snowflake = new NanoSnowflakeGenerator(1);
-            const urlID = snowflake.generateShortUrl();
-
+            const urlID = generateShortUrl();
             const short_url = await this.userRepository.create(urlID, orig_url);
 
             if (!short_url) {
