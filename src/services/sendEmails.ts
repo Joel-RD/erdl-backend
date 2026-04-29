@@ -1,4 +1,5 @@
 import nodemailer, { TransportOptions } from "nodemailer";
+import {transport} from "../utils/configEmailTransport.js"
 import { config } from "../config.js";
 
 const {configSendEmail} = config;
@@ -17,15 +18,6 @@ const templateEmailHtml = (code: string) => {
   `;
 };
 
-const transport = nodemailer.createTransport({
-    host: configSendEmail.emailHost,
-    port: Number(configSendEmail.emailPort),
-    secure: configSendEmail.emailSecure === 'true',
-    auth: {
-        user: configSendEmail.emailUser,
-        pass: configSendEmail.emailPass
-    }
-} as TransportOptions);
 
 const sendMail = async (to: string, subject: string, text: string, html: string) => {
     try {

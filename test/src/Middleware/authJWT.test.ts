@@ -1,14 +1,10 @@
+import { jest } from '@jest/globals';
 import { authJWT, verifySendToEmail } from '../../../src/Middleware/authJWT';
-import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { config } from '../../../src/config';
 
-// Mock dependencies
-jest.mock('jsonwebtoken');
-jest.mock('../../../src/config', () => ({
-    config: {
-        jwtSecret: 'test-secret'
-    }
-}));
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('Middleware: authJWT', () => {
     let req: Partial<Request>;
@@ -36,24 +32,23 @@ describe('Middleware: authJWT', () => {
             expect(next).not.toHaveBeenCalled();
         });
 
-        it('should call next() if token is valid', () => {
-            req.cookies = { authTokenAuthorized: 'valid-token' };
-            (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-                callback(null, { userId: '123', email: 'test@test.com' });
-            });
+        it('should call next() if token is valid', async () => {
+            const validToken = jwt.sign({ email: 'test@test.com', userId: '123' }, config.jwtSecret);
+            req.cookies = { authTokenAuthorized: validToken };
 
             authJWT(req as Request, res as Response, next);
-            expect(jwt.verify).toHaveBeenCalledWith('valid-token', 'test-secret', expect.any(Function));
+            await wait(50);
+
             expect(next).toHaveBeenCalled();
+            expect(req.userEmail).toBe('test@test.com');
         });
 
-        it('should return 401 if token is invalid', () => {
+        it('should return 401 if token is invalid', async () => {
             req.cookies = { authTokenAuthorized: 'invalid-token' };
-            (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-                callback(new Error('Invalid token'), null);
-            });
 
             authJWT(req as Request, res as Response, next);
+            await wait(50);
+
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Invalid token" });
             expect(next).not.toHaveBeenCalled();
@@ -67,23 +62,22 @@ describe('Middleware: authJWT', () => {
             expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: No verification session" });
         });
 
-        it('should call next() if token is valid', () => {
-            req.cookies = { emailSendToVerifyUser: JSON.stringify({ token: 'valid-token' }) };
-            (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-                callback(null, { email: 'test@test.com' });
-            });
+        it('should call next() if token is valid', async () => {
+            const validToken = jwt.sign({ email: 'test@test.com' }, config.jwtSecret);
+            req.cookies = { emailSendToVerifyUser: JSON.stringify({ token: validToken }) };
 
             verifySendToEmail(req as Request, res as Response, next);
+            await wait(50);
+
             expect(next).toHaveBeenCalled();
         });
 
-        it('should return 401 if token is invalid', () => {
+        it('should return 401 if token is invalid', async () => {
             req.cookies = { emailSendToVerifyUser: JSON.stringify({ token: 'invalid-token' }) };
-            (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-                callback(new Error('Invalid token'), null);
-            });
 
             verifySendToEmail(req as Request, res as Response, next);
+            await wait(50);
+
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Invalid verification token" });
         });

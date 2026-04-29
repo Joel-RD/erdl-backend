@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { AuthRepository } from '../../../src/repository/userAuthRepository';
 import { Client } from '@libsql/client';
 

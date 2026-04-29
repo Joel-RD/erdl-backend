@@ -1,16 +1,26 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
-    preset: 'ts-jest',
+    preset: 'ts-jest/presets/default-esm',
     testEnvironment: 'node',
     testMatch: ['**/?(*.)+(spec|test).ts'],
     moduleFileExtensions: ['ts', 'js'],
+    extensionsToTreatAsEsm: ['.ts'],
     transform: {
-        '^.+\\.ts$': ['ts-jest', {
-            tsconfig: './tsconfig.json'
+        '^.+\\.tsx?$': ['ts-jest', {
+            tsconfig: {
+                target: 'ES2022',
+                module: 'ESNext',
+                moduleResolution: 'node',
+                esModuleInterop: true,
+                skipLibCheck: true,
+                isolatedModules: true,
+            },
+            useESM: true
         }]
     },
     collectCoverage: true,
     coverageDirectory: 'coverage',
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1',
-    }
-}; 
+    },
+};
