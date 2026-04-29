@@ -12,7 +12,7 @@ let corsOptions;
 
 if (config.isProduction) {
   corsOptions = {
-    origin: "*",
+    origin: config.baseUrl,
     credentials: true
   }
   app.set('trust proxy', true)
