@@ -2,10 +2,14 @@ import express, { NextFunction, Request, Response } from "express";
 import { config } from "./config.js";
 import usersRouter from "./routers/usersRouters.js";
 import userAuthRouter from "./routers/userAuthRouter.js";
-import userProtectedAuthorized from "./routers/userProtectedAuthorized.js";
+import protectedRoutes from "./routers/protectedRoutes.js";
 import morgan from "morgan";
 import cors from "cors"
+import helmet from "helmet"
 import cookieParser from "cookie-parser"
+import logger from "./utils/logger.js";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger.js";
 
 const app = express();
 let corsOptions;
@@ -19,6 +23,10 @@ if (config.isProduction) {
 }
 
 app.use(cors(corsOptions))
+app.use(helmet({
+  contentSecurityPolicy: config.isProduction,
+  crossOriginEmbedderPolicy: config.isProduction,
+}))
 app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,10 +34,14 @@ app.use(express.urlencoded({ extended: true }));
 if (config.nodeEnv !== 'production' && process.env.SKIP_LOGS !== 'true') {
   app.use(morgan("dev"));
 }
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.use(usersRouter);
 
 app.use('/api/v1/', userAuthRouter);
-app.use('/api/v1/', userProtectedAuthorized)
+app.use('/api/v1/', protectedRoutes)
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
@@ -39,7 +51,7 @@ app.use((req: Request, res: Response) => {
 });
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Unhandled error:', err);
+  logger.error('Unhandled error:', err);
   res.status(500).json({
     error: "Internal Server Error",
     message: "An unexpected error occurred"

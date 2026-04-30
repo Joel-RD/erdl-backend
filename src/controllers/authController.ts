@@ -1,30 +1,29 @@
 import { Response, Request } from "express";
-import { AuthRepository } from "../repository/userAuthRepository.js"
-import { sendVerificationEmail } from "../services/sendEmails.js"
+import { AuthRepository } from "../repository/authRepository.js"
+import { emailService } from "../services/sendEmails.js"
 import { turso } from "../Database/databases.js"
 import { validateRegistration } from "../utils/validateUserData.js"
 import { hashPassword, comparePassword } from "../utils/password_encrypt.js"
 import { generateVerificationCode } from "../utils/codeValidatedEmail.js"
 import { config } from "../config.js"
 import { emailValidJWToken, userAuthJWToken } from "../utils/jwt.js"
+import logger from "../utils/logger.js";
 
-const authControllerRepository = new AuthRepository(turso);
+// const authControllerRepository = new AuthRepository(turso);
 const { configCookiesParams } = config;
 
-
-export class userAuthController {
+export class AuthController {
     constructor(private authControllerRepository: AuthRepository) { }
 
     authRegisterController = async (req: Request, res: Response) => {
         try {
             if (!req.body) {
-                console.error("authRegisterController: req.body is undefined");
+                logger.error("authRegisterController: req.body is undefined");
                 return res.status(409).json({ message: "Request body is missing" });
             }
 
             const { username, email, password } = req.body;
             const validation = validateRegistration({ username, email, password });
-
             if (!validation.isValid) {
                 return res.status(401).json({
                     message: "Validation failed",
@@ -33,55 +32,35 @@ export class userAuthController {
             }
 
             const existingEmail = await this.authControllerRepository.findByEmail(email);
-            if (existingEmail) {
+            if (existingEmail)
                 return res.status(409).json({ message: "Email already in use" });
-            }
 
             const passwordHash = await hashPassword(password);
-            const success = await this.authControllerRepository.create({
-                username,
-                email,
-                passwordHash,
-            });
+            const success = await this.authControllerRepository.create({username,email,passwordHash});
 
-            if (!success) {
-                return res.status(500).json({ message: "Error creating user" });
-            }
+            if (!success) return res.status(500).json({ message: "Error creating user" });
 
-            res.status(201).json({
-                message: "User created successfully"
-            });
+            res.status(201).json({message: "User created successfully"});
         } catch (error) {
-            console.error("Error in creater user processing: ", error);
+            logger.error("Error in creater user processing: ", error);
             res.status(500).json({ message: "Error al crear el usuario" });
         }
     }
 
     authLoginController = async (req: Request, res: Response) => {
         try {
-            if (!req.body) {
-                return res.status(409).json({ message: "Request body is missing" });
-            }
+            if (!req.body) return res.status(409).json({ message: "Request body is missing" });
 
             const { email, password } = req.body;
+
             const validation = validateRegistration({ email, password });
-
-            if (!validation.isValid) {
-                return res.status(401).json({
-                    message: "Validation failed",
-                    errors: validation.errors
-                });
-            }
-
+            if (!validation.isValid) return res.status(401).json({message: "Validation failed",errors: validation.errors});
+            
             const user = await this.authControllerRepository.findByEmail(email);
-            if (!user) {
-                return res.status(404).json({ message: "User not found." });
-            }
+            if (!user) return res.status(404).json({ message: "User not found." });
 
             const passwordMatch = await comparePassword(password, user.password_hash);
-            if (!passwordMatch) {
-                return res.status(401).json({ message: "Invalid password." });
-            }
+            if (!passwordMatch) return res.status(401).json({ message: "Invalid password." });
 
             const activeCode = await this.authControllerRepository.getActiveVerificationCode(email);
             if (activeCode) {
@@ -94,17 +73,16 @@ export class userAuthController {
                 });
             }
 
-            const token = emailValidJWToken(email);
             const validCode = generateVerificationCode();
             await this.authControllerRepository.savedVerificationCode(email, validCode);
-            sendVerificationEmail(email, validCode);
+            emailService.sendVerificationEmail(email, validCode);
             res.status(200).json({ message: "Login successful", user: {
                 id: user.id,
                 username: user.name,
                 email: user.email
-            } });
+            }});
         } catch (error) {
-            console.error("Error in authLoginController:", error);
+            logger.error("Error in authLoginController:", error);
             res.status(500).json({ message: "Error in login process." });
         }
     }
@@ -112,33 +90,20 @@ export class userAuthController {
     postAuthVerifyEmailController = async (req: Request, res: Response) => {
         try {
             const { code, email } = req.body;
-            if (!email || !code) {
-                return res.status(400).json({ message: "Code or Email is required." });
-            }
+            if (!email || !code) return res.status(400).json({ message: "Code or Email is required." });
 
             const user = await this.authControllerRepository.findByEmail(email);
-            if (!user) {
-                return res.status(404).json({ message: "User not found." });
-            }
-
+            if (!user) return res.status(404).json({ message: "User not found." });
+            
             const codeMatch = await this.authControllerRepository.verifyVerificationCode(email, code);
-            if (!codeMatch) {
-                return res.status(404).json({ message: "Invalid code." });
-            }
+            if (!codeMatch) return res.status(404).json({ message: "Invalid code." });
             
             await this.authControllerRepository.updateUsedVerificationCode(email);
             const token = userAuthJWToken(email);
-            res.cookie("authTokenAuthorized", token, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-                path: '/'
-            });
-            
+            res.cookie("authTokenAuthorized", token, configCookiesParams);
             res.status(200).json({ message: "Login successful." });
         } catch (error) {
-            console.error("Error in postAuthVerifyEmailController:", error);
+            logger.error("Error in postAuthVerifyEmailController:", error);
             res.status(500).json({ message: "Error in verification process." });
         }
     }

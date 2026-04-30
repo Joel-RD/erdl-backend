@@ -12,7 +12,7 @@ export interface ConfigCookiesParams {
     path: string;
 }
 
-export interface IUserRepository {
+export interface IUrlRepository {
     findById(short_url: string): Promise<string | null>;
     create(short_url: string, original_url: string): Promise<string | null>;
 }
@@ -23,8 +23,8 @@ export interface CreateUser {
     passwordHash: string;
 }
 
-export interface IUserAuthRepository {
-    findByEmail(email: string): Promise<any | null>;
+export interface IAuthRepository {
+    findByEmail(email: string): Promise<{ id: number; name: string; email: string; password_hash: string } | null>;
     create(user: {
         username: string;
         email: string;
@@ -32,8 +32,8 @@ export interface IUserAuthRepository {
         name?: string;
         lastName?: string;
     }): Promise<boolean>;
-    savedVerificationCode(email: string, code: string): Promise<boolean>;
+    savedVerificationCode(email: string, code: string): Promise<void>;
     verifyVerificationCode(email: string, code: string): Promise<boolean>;
-    updateUsedVerificationCode(email: string): Promise<boolean>;
-    getActiveVerificationCode(email: string): Promise<any | null>;
+    updateUsedVerificationCode(email: string): Promise<void>;
+    getActiveVerificationCode(email: string): Promise<{ expires_at: string } | null>;
 }

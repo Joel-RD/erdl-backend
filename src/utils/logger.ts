@@ -7,7 +7,7 @@ const appDirname = isESM
   ? path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Z]:)/, '$1')
   : process.cwd();
 
-const isProduction = process.env.NODE_ENV === 'Production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Formato para desarrollo - legible y con colores
 const devFormat = winston.format.combine(
@@ -72,10 +72,10 @@ if (!isProduction) {
 
 // Logger personalizado que exporta métodos convenientes
 export const log = {
-  info: (message: string, meta?: Record<string, unknown>) => logger.info(message, meta),
-  warn: (message: string, meta?: Record<string, unknown>) => logger.warn(message, meta),
-  error: (message: string, meta?: Record<string, unknown>) => logger.error(message, meta),
-  debug: (message: string, meta?: Record<string, unknown>) => logger.debug(message, meta),
+  info: (message: string, meta?: Record<string, unknown>) => logger.info(message, { ...meta, timestamp: new Date().toISOString() }),
+  warn: (message: string, meta?: Record<string, unknown>) => logger.warn(message, { ...meta, timestamp: new Date().toISOString() }),
+  error: (message: string, meta?: Record<string, unknown>) => logger.error(message, { ...meta, timestamp: new Date().toISOString() }),
+  debug: (message: string, meta?: Record<string, unknown>) => logger.debug(message, { ...meta, timestamp: new Date().toISOString() }),
 };
 
 // Exportar logger completo y funciones individuales

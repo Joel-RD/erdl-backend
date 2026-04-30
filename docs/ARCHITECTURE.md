@@ -1,52 +1,45 @@
-# 🏗️ Technical Architecture
+# 🏗️ ERDL URL Shortener - Architecture Overview
 
-This document provides a deep dive into the architectural decisions and data structures used in the **Shortener URL** project.
-
-## 📐 Design Patterns
-
-### Repository Pattern
-
-The project uses the Repository Pattern to abstract the data access layer. This allows the business logic (Controllers) to interact with the data without knowing the specific database implementation details (LibSQL, Redis, etc.).
-
-- **Interface**: `IUserRepository` defines the contract.
-- **Implementation**: `UserRepository` implements the logic using `@libsql/client`.
-
-### Controller Pattern
-
-The `UserController` handles incoming HTTP requests, validates inputs, interacts with the repository, and returns formatted responses.
+This document describes the current architecture of the ERDL URL Shortener backend, based on the live codebase (ignoring planned refactors).
 
 ---
 
-## 🆔 ID Generation (Snowflake)
+## 📐 Architectural Patterns
+### Repository Pattern
+The project uses the Repository Pattern to abstract database access:
+- **Responsibility**: Separates data access logic from business logic
+- **Implementation**: `src/repository/` contains repository classes that handle all LibSQL queries
+- **Benefit**: Controllers and services don't need to know database implementation details
 
-We use a custom **Snowflake-like** ID generator to produce unique 64-bit integers.
+### Controller-Service-Repository Layering
+Requests flow through three layers:
+1. **Routers** (`src/routers/`): Define API endpoints and HTTP methods
+2. **Controllers** (`src/controllers/`): Handle HTTP requests, input validation, and response formatting
+3. **Repositories** (`src/repository/`): Execute database queries and return data
+4. **Services** (`src/services/`): Contain business logic (e.g., email sending)
 
-### Structure of the ID
+---
 
-- **Timestamp (41 bits)**: Milliseconds since Jan 1, 2024.
-- **Machine ID (5 bits)**: Unique identifier for the worker node.
-- **Sequence (5 bits)**: Incremental counter for IDs generated within the same millisecond.
-
-### Why Snowflake?
-
-- **Scalability**: Multiple machines can generate IDs simultaneously without a central authority.
-- **Sortability**: IDs are roughly ordered by time.
-
-### Why Base62?
-
-After generating the numeric ID, we convert it to **Base62**. This reduces the length of the URL significantly (e.g., a 15-digit number becomes a 5-6 character string) using the character set `[0-9a-zA-Z]`.
+## 🆔 Short URL ID Generation
+The project uses `nanoid` to generate unique short identifiers:
+- **Default Length**: 8 characters
+- **Character Set**: URL-safe alphanumeric (`A-Za-z0-9`)
+- **Implementation**: `src/utils/nanoidTool.ts` exports `generateShortId()`
+- **Benefit**: Compact, collision-resistant, no external ID generation service required
 
 ---
 
 ## 🗄️ Database Schema
+The project uses **LibSQL** (SQLite-compatible) with two configurations:
+- **Development**: Local file-based SQLite at `src/Database/databases.db`
+- **Production**: Turso managed LibSQL instance
 
-The database uses **LibSQL** (SQLite dialect). Below is a visualization of the core schema:
-
+### Core Tables (from `src/Database/sheme.sql`):
 ```mermaid
 erDiagram
     USERS ||--o{ URLS : "owns"
     USERS {
-        int id PK
+        integer id PK
         string username
         string email
         string password_hash
@@ -56,20 +49,21 @@ erDiagram
         boolean account_active
         string subscription_tier
         datetime created_at
+        datetime updated_at
     }
     URLS {
-        int id PK
-        int user_id FK
+        integer id PK
+        integer user_id FK
         string original_url
         string short_url
-        int views
+        integer views
         boolean is_active
         datetime expires_at
         datetime created_at
     }
     VERIFICATION_CODES {
-        int id PK
-        int user_id FK
+        integer id PK
+        integer user_id FK
         string email
         string code
         boolean used
@@ -78,16 +72,38 @@ erDiagram
     }
 ```
 
-### Key Considerations
-
-- **Indexes**: There are indexes on `short_url` and `user_id` to ensure $O(1)$ or $O(\log n)$ lookup times.
-- **Cleanup**: Triggers are used to automatically delete expired or used verification codes.
+### Database Configuration
+- **Connection**: Initialized in `src/Database/databases.ts` using `@libsql/client`
+- **WAL Mode**: Enabled for better concurrent read/write performance
+- **Indexes**: Applied on `short_url` (URL lookups) and `user_id` (user-specific queries)
 
 ---
 
-## 🏎️ Caching & Rate Limiting (Redis)
+## 🔐 Authentication Flow
+1. **Registration**: User submits email/password → password hashed with bcryptjs → user stored in DB → verification code sent via Nodemailer
+2. **Email Verification**: User submits code → code validated against `VERIFICATION_CODES` → `email_verified` set to `true`
+3. **Login**: User submits credentials → password compared → JWT generated with `jsonwebtoken` → JWT stored in HttpOnly cookie `authTokenAuthorized`
+4. **Protected Routes**: `src/Middleware/authJWT.ts` validates JWT from cookie → attaches user to request object
 
-Redis is integrated to handle high-frequency tasks:
+---
 
-1. **Rate Limiting**: Prevents abuse by limiting the number of URLs a user can shorten in a given period.
-2. **Redirect Caching**: (Planned) Store hot URL mappings in memory to reduce database load.
+## 🛡️ Security Middleware
+Configured in `src/main.ts`:
+- **Helmet**: Sets secure HTTP headers (CSP, XSS protection, etc.)
+- **CORS**: Restricts requests to `DOMAIN_FOR_FRONTEND` (configured in `src/config.ts`)
+- **Cookie Parser**: Parses incoming cookies for JWT validation
+- **Rate Limiting**: `express-rate-limit` prevents abuse of shortening endpoints
+
+---
+
+## 📊 Logging
+- **Winston**: Structured logging with environment-aware levels
+- **Morgan**: HTTP request logging (disabled in production by default)
+- **Configuration**: `src/utils/logger.ts` exports `log` and `logger` instances
+
+---
+
+## 📚 API Documentation
+- **Swagger/OpenAPI 3.0**: Configured in `src/docs/swagger.ts`
+- **Interactive Docs**: Available at `/api-docs` in development
+- **Spec Generation**: Uses `swagger-jsdoc` to parse JSDoc comments from routers and controllers
