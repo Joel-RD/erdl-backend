@@ -1,6 +1,7 @@
 
 import dotenv from "dotenv";
 import { ConfigCookiesParams } from "./models/types.js"
+import logger from "./utils/logger.js";
 
 dotenv.config();
 
@@ -10,13 +11,22 @@ export const config = {
     port: PORT || 3000,
     isProduction: NODE_ENV === "production" ? true : false,
     baseUrl: DOMAIN_FOR_FRONTEND || "http://localhost:3000",
-    jwtSecret: JWT_SECRET || "default_secret_key_for_development_only",
+    jwtSecret: (() => {
+        if (!JWT_SECRET) {
+            if (NODE_ENV === 'production') {
+                throw new Error('JWT_SECRET is required in production');
+            }
+            logger.warn('WARNING: Using development JWT secret - DO NOT USE IN PRODUCTION');
+            return 'dev_only_secret_' + Math.random().toString(36);
+        }
+        return JWT_SECRET;
+    })(),
     nodeEnv: NODE_ENV,
     configCookiesParams: {
         httpOnly: HTTP_ONLY || true,
-        secure: SECURE || false,
+        secure: SECURE || true,
         sameSite: SAME_SITE || "lax",
-        maxAge: Number(MAX_AGE) || (2 * 24 * 60 * 60 * 1000),
+        maxAge: Number(MAX_AGE) || ( 7 * 24 * 60 * 60 * 1000),
         path: PATH || "/"
     } as ConfigCookiesParams,
     configSendEmail: ({
@@ -26,13 +36,7 @@ export const config = {
         emailPort: EMAIL_PORT || '',
         emailSecure: EMAIL_SECURE || '',
     }),
-    db_turso: async (local_file_path?: string) => {
-        const isProduction = NODE_ENV?.toLowerCase() === 'production';
-        if (!isProduction) {
-            return {
-                url: local_file_path,
-            }
-        }
+    DB_CONNECT: async () => {
         return {
             url: DB_TURSO_URL,
             authToken: DB_TURSO_AUTH_TOKEN

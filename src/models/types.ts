@@ -12,7 +12,7 @@ export interface ConfigCookiesParams {
     path: string;
 }
 
-export interface IUserRepository {
+export interface IUrlRepository {
     findById(short_url: string): Promise<string | null>;
     create(short_url: string, original_url: string): Promise<string | null>;
 }
@@ -23,7 +23,7 @@ export interface CreateUser {
     passwordHash: string;
 }
 
-export interface IUserAuthRepository {
+export interface IAuthRepository {
     findByEmail(email: string): Promise<any | null>;
     create(user: {
         username: string;

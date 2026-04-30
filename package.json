@@ -32,6 +32,8 @@
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^7.0.9",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/yamljs": "^0.2.34",
     "autocannon": "^8.0.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
@@ -50,10 +52,15 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "nanoid": "^5.1.9",
     "nodemailer": "^8.0.5",
-    "winston": "^3.19.0"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.19.0",
+    "yamljs": "^0.3.0"
   }
 }

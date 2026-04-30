@@ -1,7 +1,7 @@
 import { Client } from "@libsql/client";
-import { CreateUser, IUserAuthRepository } from "../models/types.js"
+import { CreateUser, IAuthRepository } from "../models/types.js"
 
-export class AuthRepository implements IUserAuthRepository {
+export class AuthRepository implements IAuthRepository {
     constructor(private DB: Client) { }
 
     async findByEmail(email: string): Promise<any | null> {

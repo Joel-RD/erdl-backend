@@ -1,16 +1,16 @@
 import { Router } from "express";
 import { limitAuthButton } from "../utils/limitClick.js";
-import { userAuthController } from "../controllers/userAuthController.js";
-import { AuthRepository } from "../repository/userAuthRepository.js";
+import { AuthController } from "../controllers/authController.js";
+import { AuthRepository } from "../repository/authRepository.js";
 import { turso } from "../Database/databases.js";
 
 const router = Router();
-const userAuthRepositorys = new AuthRepository(turso);
-const userAuthControllers = new userAuthController(userAuthRepositorys);
+const authRepository = new AuthRepository(turso);
+const authController = new AuthController(authRepository);
 
-router.post("/auth/verify-email", limitAuthButton, userAuthControllers.postAuthVerifyEmailController);
-router.post("/auth/register", limitAuthButton, userAuthControllers.authRegisterController);
-router.post("/auth/login", limitAuthButton, userAuthControllers.authLoginController);
+router.post("/auth/verify-email", limitAuthButton, authController.postAuthVerifyEmailController);
+router.post("/auth/register", limitAuthButton, authController.authRegisterController);
+router.post("/auth/login", limitAuthButton, authController.authLoginController);
 
 export default router;
  
