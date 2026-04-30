@@ -3,8 +3,8 @@ import { config } from "../config.js";
 import path from "path"
 
 const { db_turso } = config;
-const localRootDb = path.join("file:", process.cwd(), "src", "Database", "databases.db")
-const turso_connect = await config.db_turso(localRootDb);
+const local_db_path = path.join("file:", process.cwd(), "src", "Database", "databases.db");
+const turso_connect = await config.db_turso(local_db_path);
 
 // Add a check to ensure url is defined
 if (!turso_connect.url) {
