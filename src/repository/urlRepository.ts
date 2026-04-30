@@ -1,6 +1,6 @@
 import { IUrlRepository } from "../models/types.js"
 import { Client } from "@libsql/client";
-import { log } from "../utils/logger.js";
+import logger from "../utils/logger.js";
 
 export class UrlRepository implements IUrlRepository {
     constructor(private DB: Client) { }
@@ -19,7 +19,7 @@ export class UrlRepository implements IUrlRepository {
 
             return originalUrl;
         } catch (error) {
-            log.error('Error en findById repository', { error, short_url });
+            logger.error('Error en findById repository', { error, short_url });
             return null;
         }
     }
@@ -32,7 +32,7 @@ export class UrlRepository implements IUrlRepository {
             });
             return short_url;
         } catch (error) {
-            log.error('Error en create repository', { error, short_url, original_url });
+            logger.error('Error en create repository', { error, short_url, original_url });
             return null;
         }
     }

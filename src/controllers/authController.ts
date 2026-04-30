@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import { AuthRepository } from "../repository/authRepository.js"
-import { sendVerificationEmail } from "../services/sendEmails.js"
+import { emailService } from "../services/sendEmails.js"
 import { turso } from "../Database/databases.js"
 import { validateRegistration } from "../utils/validateUserData.js"
 import { hashPassword, comparePassword } from "../utils/password_encrypt.js"
@@ -75,7 +75,7 @@ export class AuthController {
 
             const validCode = generateVerificationCode();
             await this.authControllerRepository.savedVerificationCode(email, validCode);
-            sendVerificationEmail(email, validCode);
+            emailService.sendVerificationEmail(email, validCode);
             res.status(200).json({ message: "Login successful", user: {
                 id: user.id,
                 username: user.name,
