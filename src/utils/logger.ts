@@ -51,10 +51,12 @@ const logger = winston.createLogger({
     new winston.transports.File({
       ...getFileTransportOptions('error.log'),
       level: 'error',
+      silent: process.env.STRESS_TEST === 'true'
     }),
-    // Transport para todos los logs
+    // Transport para todos los logs 
     new winston.transports.File({
       ...getFileTransportOptions('combined.log'),
+      silent: process.env.STRESS_TEST === 'true'
     }),
   ],
 });

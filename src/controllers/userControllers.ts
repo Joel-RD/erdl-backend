@@ -1,11 +1,9 @@
 import { Response, Request } from "express";
-import { generateShortUrl } from "../utils/shortId.js"
+import { generateShortId } from "../utils/nanoidTool.js"
 import { UserRepository } from "../repository/urlShortAnonimusRepository.js"
-import { turso } from "../Database/databases.js"
 import { config } from "../config.js"
 import { log } from "../utils/logger.js";
 
-const userRepository = new UserRepository(turso);
 const { baseUrl } = config;
 
 export class UserController {
@@ -19,7 +17,8 @@ export class UserController {
                 return res.status(401).json({ message: "Debe ingresar una URL válida." });
             }
 
-            const urlID = generateShortUrl();
+            const urlID = generateShortId(8);
+
             const short_url = await this.userRepository.create(urlID, orig_url);
 
             if (!short_url) {
