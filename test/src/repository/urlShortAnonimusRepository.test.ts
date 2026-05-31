@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { UserRepository } from '../../../src/repository/urlShortAnonimusRepository';
+import { UrlRepository } from '../../../src/repository/urlRepository';
 import { Client } from '@libsql/client';
 
 jest.mock('../../../src/utils/logger.js', () => ({
@@ -10,8 +10,8 @@ jest.mock('../../../src/utils/logger.js', () => ({
     }
 }));
 
-describe('UserRepository (URL Shortener)', () => {
-    let repository: UserRepository;
+describe('UrlRepository (URL Shortener)', () => {
+    let repository: UrlRepository;
     let mockExecute: jest.Mock;
     let mockClient: Client;
 
@@ -20,7 +20,7 @@ describe('UserRepository (URL Shortener)', () => {
         mockClient = {
             execute: mockExecute
         } as unknown as Client;
-        repository = new UserRepository(mockClient);
+        repository = new UrlRepository(mockClient);
     });
 
     describe('findById (find original url by short code)', () => {

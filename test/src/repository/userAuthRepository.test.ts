@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { AuthRepository } from '../../../src/repository/userAuthRepository';
+import { AuthRepository } from '../../../src/repository/authRepository';
 import { Client } from '@libsql/client';
 
 describe('AuthRepository', () => {
