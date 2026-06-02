@@ -8,8 +8,6 @@ import cors from "cors"
 import helmet from "helmet"
 import cookieParser from "cookie-parser"
 import logger from "./utils/logger.js";
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./docs/swagger.js";
 
 const app = express();
 let corsOptions;
@@ -34,9 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 if (config.nodeEnv !== 'production' && process.env.SKIP_LOGS !== 'true') {
   app.use(morgan("dev"));
 }
-
-// Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(usersRouter);
 

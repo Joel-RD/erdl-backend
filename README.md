@@ -1,5 +1,5 @@
 # 🔗 ERDL URL Shortener API
-A robust and scalable URL shortener API built with **Node.js**, **Express 5**, **TypeScript**, and **LibSQL**. Features JWT-based authentication with email verification, interactive Swagger documentation, and secure cookie handling.
+A robust and scalable URL shortener API built with **Node.js**, **Express 5**, **TypeScript**, and **LibSQL**. Features JWT-based authentication with email verification and secure cookie handling.
 
 ---
 
@@ -8,7 +8,6 @@ A robust and scalable URL shortener API built with **Node.js**, **Express 5**, *
 - **User Authentication**: Complete auth system with registration, login, email verification, and protected routes using JWT stored in HttpOnly cookies
 - **Data Persistence**: LibSQL (Turso for production, local SQLite for development)
 - **Security**: Helmet for HTTP headers, CORS configuration, rate limiting, bcryptjs password hashing
-- **API Documentation**: Swagger UI available at `/api-docs` with OpenAPI 3.0 specs
 - **Logging**: Winston structured logging with environment-aware output
 - **Error Handling**: Centralized error middleware for consistent responses
 
@@ -20,7 +19,7 @@ A robust and scalable URL shortener API built with **Node.js**, **Express 5**, *
 - **Database**: LibSQL (SQLite-compatible, Turso for production)
 - **Authentication**: `jsonwebtoken`, `bcryptjs`
 - **Email**: Nodemailer
-- **Utilities**: `nanoid`, Winston, Morgan, Swagger/OpenAPI
+- **Utilities**: `nanoid`, Winston, Morgan
 - **Testing**: Jest, Supertest
 - **Security**: Helmet, `express-rate-limit`, CORS
 
@@ -43,7 +42,7 @@ src/
 ├── services/               # Business logic (email sending)
 ├── Middleware/             # Custom middleware (auth JWT)
 ├── utils/                  # Helper utilities (nanoid, logger, JWT, validation)
-└── docs/                   # Swagger/OpenAPI configuration
+└── docs/                   # Documentation
 ```
 
 ---
@@ -82,7 +81,7 @@ src/
    ```bash
    npm run dev
    ```
-   The server starts at `http://localhost:3000`. Swagger docs available at `http://localhost:3000/api-docs`.
+   The server starts at `http://localhost:3000`.
 
 ---
 
@@ -163,15 +162,6 @@ All API responses follow a consistent JSON format:
 - `404`: Not Found
 - `429`: Too Many Requests (rate limit exceeded)
 - `500`: Internal Server Error
-
----
-
-## 📚 Swagger API Documentation
-Interactive API documentation is available at:
-```
-http://localhost:3000/api-docs
-```
-Generated using Swagger JSDoc and served with `swagger-ui-express`. Configuration is in `src/docs/swagger.ts`.
 
 ---
 

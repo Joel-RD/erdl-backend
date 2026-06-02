@@ -103,7 +103,4 @@ Configured in `src/main.ts`:
 
 ---
 
-## 📚 API Documentation
-- **Swagger/OpenAPI 3.0**: Configured in `src/docs/swagger.ts`
-- **Interactive Docs**: Available at `/api-docs` in development
-- **Spec Generation**: Uses `swagger-jsdoc` to parse JSDoc comments from routers and controllers
+
