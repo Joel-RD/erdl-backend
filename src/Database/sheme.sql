@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS users (
     last_name TEXT,
     email_verified BOOLEAN DEFAULT 0,
     account_active BOOLEAN DEFAULT 1,
-    subscription_active TEXT DEFAULT 'free' CHECK(subscription_active IN ('free', 'pro', 'premium')),
+    email_attempt_count INTEGER DEFAULT 0,
+    email_blocked_until DATETIME,
+    password_attempt_count INTEGER DEFAULT 0,
+    password_blocked_until DATETIME,
     subscription_tier TEXT DEFAULT 'free' CHECK(subscription_tier IN ('free', 'pro', 'premium')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -23,7 +26,7 @@ CREATE TABLE IF NOT EXISTS urls (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     original_url TEXT NOT NULL,
-    short_url TEXT UNIQUE NOT NULL,
+    short_url TEXT UNIQUE NOT NULL, 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     expires_at DATETIME,
     views INTEGER DEFAULT 0,
@@ -37,6 +40,8 @@ CREATE TABLE IF NOT EXISTS verification_codes (
     user_id INTEGER,
     email TEXT UNIQUE,
     code TEXT UNIQUE,
+    attempt_count INTEGER DEFAULT 0,
+    blocked_until DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     expires_at DATETIME DEFAULT (DATETIME('now', '+10 minutes')),
     used BOOLEAN DEFAULT 0,
@@ -60,12 +65,12 @@ CREATE INDEX IF NOT EXISTS idx_verification_expires ON verification_codes(expire
 CREATE INDEX IF NOT EXISTS idx_verification_used ON verification_codes(used);
 
 
--- Trigger 1: Eliminar códigos de verificación expirados (más de 4 minutos)
+-- Trigger 1: Eliminar códigos de verificación expirados
 CREATE TRIGGER IF NOT EXISTS delete_expired_verification_codes
 AFTER INSERT ON verification_codes
 BEGIN
     DELETE FROM verification_codes
-    WHERE DATETIME('now') > DATETIME(created_at, '+4 minutes')
+    WHERE expires_at < DATETIME('now')
     AND used = 0;
 END;
 
@@ -77,4 +82,5 @@ BEGIN
     DELETE FROM verification_codes
     WHERE id = NEW.id;
 END;
+
 

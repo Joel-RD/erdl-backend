@@ -1,21 +1,33 @@
 import { jest } from '@jest/globals';
-import { UrlRepository } from '../../../src/repository/urlRepository';
 import { Client } from '@libsql/client';
 
-jest.mock('../../../src/utils/logger.js', () => ({
-    log: {
+jest.unstable_mockModule('../../../src/utils/logger.js', () => ({
+    __esModule: true,
+    default: {
         error: jest.fn(),
         info: jest.fn(),
         warn: jest.fn()
     }
 }));
 
+type UrlRepositoryModule = typeof import('../../../src/repository/urlRepository.js');
+type LoggerModule = typeof import('../../../src/utils/logger.js');
+
+let UrlRepository: UrlRepositoryModule['UrlRepository'];
+let mockedLogger: { error: jest.Mock; info: jest.Mock; warn: jest.Mock };
+
+beforeAll(async () => {
+    ({ UrlRepository } = await import('../../../src/repository/urlRepository.js'));
+    mockedLogger = (await import('../../../src/utils/logger.js')).default as unknown as { error: jest.Mock; info: jest.Mock; warn: jest.Mock };
+});
+
 describe('UrlRepository (URL Shortener)', () => {
-    let repository: UrlRepository;
+    let repository: InstanceType<UrlRepositoryModule['UrlRepository']>;
     let mockExecute: jest.Mock;
     let mockClient: Client;
 
     beforeEach(() => {
+        jest.clearAllMocks();
         mockExecute = jest.fn();
         mockClient = {
             execute: mockExecute
@@ -38,40 +50,44 @@ describe('UrlRepository (URL Shortener)', () => {
 
         it('should return null if not found', async () => {
             mockExecute.mockResolvedValue({ rows: [] });
-            // Note: The implementation checks `!result.rows` (undefined check) or empty array?
-            // "if (!result.rows) return null" covers potentially undefined rows property.
-            // "result.rows[0]" accesses first element.
-            // We should mock result.rows as undefined or empty array based on library behavior.
-            // Let's assume empty array for "not found".
 
-            // Wait, looking at implementation: "if (!result.rows) { return null; }"
-            // If rows is [], ![] is false.
-            // Then "return result.rows[0].original_url". result.rows[0] is undefined. undefined.original_url throws error.
-            // The implementation might have a bug if rows is empty array [].
-            // Or maybe library returns null for rows?
-            // Let's mock both scenarios to be safe or just assume empty array check.
-
-            // Testing the implementation logic:
-            // "if (!result.rows)" -> likely checks for existence of rows property.
-
-            // For this test, let's simulate returning null (which returns null)
             const result = await repository.findById('notfound');
-            // based on implementation catch block returns null too
-            // expect(result).toBeNull();
+            expect(result).toBeNull();
+        });
+
+        it('should return null if rows property is undefined', async () => {
+            mockExecute.mockResolvedValue({});
+
+            const result = await repository.findById('notfound');
+            expect(result).toBeNull();
+        });
+
+        it('should throw on database error', async () => {
+            mockExecute.mockRejectedValue(new Error('DB Error'));
+
+            await expect(repository.findById('short123')).rejects.toThrow('Error buscando la URL en el repositorio');
+            expect(mockedLogger.error).toHaveBeenCalled();
         });
     });
 
     describe('create', () => {
-        it('should return short_url on success', async () => {
-            mockExecute.mockResolvedValue({ rows: [] }); // insert successful
+        it('should return short_url on success and pass args in the right order', async () => {
+            mockExecute.mockResolvedValue({ rows: [] });
+
             const result = await repository.create('short123', 'http://google.com');
+
+            expect(mockExecute).toHaveBeenCalledWith(expect.objectContaining({
+                sql: expect.stringContaining('INSERT INTO urls'),
+                args: ['http://google.com', 'short123']
+            }));
             expect(result).toBe('short123');
         });
 
-        it('should return null on failure', async () => {
+        it('should throw on failure', async () => {
             mockExecute.mockRejectedValue(new Error('DB Error'));
-            const result = await repository.create('short123', 'http://google.com');
-            //expect(result).toBeNull();
+
+            await expect(repository.create('short123', 'http://google.com')).rejects.toThrow('Error creando la URL');
+            expect(mockedLogger.error).toHaveBeenCalled();
         });
     });
 });

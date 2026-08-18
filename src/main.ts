@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import { config } from "./config.js";
 import usersRouter from "./routers/usersRouters.js";
 import userAuthRouter from "./routers/userAuthRouter.js";
@@ -7,17 +7,14 @@ import morgan from "morgan";
 import cors from "cors"
 import helmet from "helmet"
 import cookieParser from "cookie-parser"
-import logger from "./utils/logger.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 let corsOptions;
 
-if (config.isProduction) {
-  corsOptions = {
-    origin: config.baseUrl,
-    credentials: true
-  }
-  app.set('trust proxy', true)
+corsOptions = {
+  origin: config.baseUrl,
+  credentials: true
 }
 
 app.use(cors(corsOptions))
@@ -38,19 +35,8 @@ app.use(usersRouter);
 app.use('/api/v1/', userAuthRouter);
 app.use('/api/v1/', protectedRoutes)
 
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    error: "Not Found",
-    message: `Route ${req.method} ${req.path} not found`
-  });
-});
+app.use(notFoundHandler);
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  logger.error('Unhandled error:', err);
-  res.status(500).json({
-    error: "Internal Server Error",
-    message: "An unexpected error occurred"
-  });
-});
+app.use(errorHandler);
 
 export default app;

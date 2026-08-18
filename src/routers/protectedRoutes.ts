@@ -6,7 +6,7 @@ const router = Router();
 
 router.get(`/auth/user/profile`, authJWT, (req: Request, res: Response) => {
     res.json({
-        message: "Profile accessed successfully",
+        message: "Perfil consultado correctamente",
         user: {
             email: req.userEmail
         }
