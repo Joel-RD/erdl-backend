@@ -1,188 +1,387 @@
-# 🔗 ERDL URL Shortener API
-A robust and scalable URL shortener API built with **Node.js**, **Express 5**, **TypeScript**, and **LibSQL**. Features JWT-based authentication with email verification and secure cookie handling.
+# ERDL URL Shortener API
+
+API de acortamiento de URLs con sistema de autenticación completo: registro, verificación de email por código y rutas protegidas mediante JWT en cookies HttpOnly. Construida con **Node.js**, **Express 5**, **TypeScript** y **LibSQL**.
 
 ---
 
-## ✨ Features
-- **Short URL Generation**: Uses `nanoid` to generate unique, secure 8-character short identifiers
-- **User Authentication**: Complete auth system with registration, login, email verification, and protected routes using JWT stored in HttpOnly cookies
-- **Data Persistence**: LibSQL (Turso for production, local SQLite for development)
-- **Security**: Helmet for HTTP headers, CORS configuration, rate limiting, bcryptjs password hashing
-- **Logging**: Winston structured logging with environment-aware output
-- **Error Handling**: Centralized error middleware for consistent responses
+## Características
+
+- **Acortamiento de URLs**: genera identificadores únicos de 8 caracteres con `nanoid`
+- **Autenticación de 3 pasos**: registro o login → código de verificación por email → cookie JWT firmada
+- **Persistencia de datos**: LibSQL (SQLite local en desarrollo, Turso en producción)
+- **Protección anti-SSRF**: validación exhaustiva de URLs de destino (sin IPs privadas, sin localhost, sin credenciales)
+- **Límite de intentos**: bloqueo automático tras 5 intentos fallidos (email, contraseña o código)
+- **Rate limiting**: protección por IP en cada endpoint
+- **Seguridad**: Helmet, CORS configurable, cookies HttpOnly/SameSite, bcryptjs (10 rounds)
+- **Logging**: Winston estructurado con archivos rotativos (5 MB) y Morgan en desarrollo
+- **Manejo centralizado de errores**: `AppError` con códigos de estado y detalles consistentes
 
 ---
 
-## 🛠️ Tech Stack
-- **Runtime**: Node.js (v18+) & TypeScript 5
-- **Framework**: Express.js 5
-- **Database**: LibSQL (SQLite-compatible, Turso for production)
-- **Authentication**: `jsonwebtoken`, `bcryptjs`
-- **Email**: Nodemailer
-- **Utilities**: `nanoid`, Winston, Morgan
-- **Testing**: Jest, Supertest
-- **Security**: Helmet, `express-rate-limit`, CORS
+## Stack tecnológico
+
+| Capa | Tecnología |
+|------|-----------|
+| Runtime | Node.js v18+ (ESM) |
+| Lenguaje | TypeScript 5 |
+| Framework | Express.js 5 |
+| Base de datos | LibSQL (`@libsql/client`) — SQLite local / Turso en producción |
+| Autenticación | `jsonwebtoken`, `bcryptjs` |
+| Envío de email | `nodemailer` |
+| IDs únicos | `nanoid` (8 caracteres) |
+| Logging | Winston, Morgan |
+| Seguridad | Helmet, `express-rate-limit`, CORS |
+| Testing | Jest, Supertest, ts-jest (ESM) |
+| Stress testing | autocannon |
 
 ---
 
-## 📂 Project Structure
+## Estructura del proyecto
+
 ```
-src/
-├── main.ts                 # App initialization, middleware setup, route mounting
-├── run.ts                  # Server entry point with error handling
-├── config.ts               # Centralized environment configuration
-├── Database/               # Database layer
-│   ├── databases.ts        # LibSQL client initialization
-│   ├── databases.db        # Local SQLite database (development)
-│   └── sheme.sql          # Database schema (note: typo in filename)
-├── models/                 # TypeScript interfaces and types
-├── routers/                # API route definitions
-├── controllers/            # Request handlers (HTTP logic)
-├── repository/             # Data access layer (DB queries)
-├── services/               # Business logic (email sending)
-├── Middleware/             # Custom middleware (auth JWT)
-├── utils/                  # Helper utilities (nanoid, logger, JWT, validation)
-└── docs/                   # Documentation
+erdl-backend/
+├── src/
+│   ├── main.ts                      # Inicialización de Express, middlewares y rutas
+│   ├── run.ts                       # Punto de entrada del servidor
+│   ├── config.ts                    # Configuración centralizada desde variables de entorno
+│   ├── Database/
+│   │   ├── databases.ts             # Cliente LibSQL (SQLite local / Turso)
+│   │   ├── databases.db             # Base de datos local (desarrollo)
+│   │   └── sheme.sql                # Esquema de la base de datos
+│   ├── models/
+│   │   └── types.ts                 # Interfaces y tipos TypeScript
+│   ├── routers/
+│   │   ├── usersRouters.ts          # Rutas de acortamiento y redirección
+│   │   ├── userAuthRouter.ts        # Rutas de registro, login y verificación
+│   │   └── protectedRoutes.ts       # Rutas protegidas por JWT
+│   ├── controllers/
+│   │   ├── urlController.ts         # Controlador de URLs
+│   │   └── authController.ts        # Controlador de autenticación
+│   ├── services/
+│   │   ├── urlService.ts            # Lógica de negocio de URLs
+│   │   ├── authService.ts           # Lógica de negocio de autenticación
+│   │   └── sendEmails.ts            # Servicio de envío de emails (Nodemailer)
+│   ├── repository/
+│   │   ├── urlRepository.ts         # Acceso a datos de URLs
+│   │   └── authRepository.ts        # Acceso a datos de usuarios y verificación
+│   ├── Middleware/
+│   │   └── authJWT.ts               # Middleware JWT (authJWT, verifySendToEmail)
+│   ├── middleware/
+│   │   └── errorHandler.ts          # Manejador de errores centralizado
+│   └── utils/
+│       ├── AppError.ts              # Clase de error personalizada
+│       ├── attemptLimiter.ts        # Configuración de límite de intentos
+│       ├── codeValidatedEmail.ts    # Generación de código de verificación
+│       ├── configEmailTransport.ts  # Transporte Nodemailer
+│       ├── jwt.ts                   # Generación de tokens JWT
+│       ├── limitClick.ts            # Rate limiting por IP
+│       ├── logger.ts                # Winston logger
+│       ├── nanoidTool.ts            # Generación de IDs cortos
+│       ├── password_encrypt.ts      # Hash y comparación con bcryptjs
+│       └── validateUserData.ts      # Validación de email, contraseña, registro y dominios
+├── test/
+│   ├── setup.ts                     # Configuración global de tests
+│   ├── src/                         # Tests unitarios (controllers, services, repository, utils)
+│   └── stress/
+│       └── stress-tester.ts         # Tests de estrés con autocannon
+├── docs/
+│   └── ARCHITECTURE.md              # Documentación de arquitectura
+├── jest.config.js                   # Configuración de Jest
+├── tsconfig.json                    # Configuración de TypeScript
+├── nodemon.json                     # Configuración de Nodemon
+├── package.json
+├── .env.example
+└── .gitignore
 ```
 
 ---
 
-## 🚀 Getting Started
-### Prerequisites
-- Node.js v18 or higher
-- npm or pnpm
-- Turso account (for production) or local SQLite
-- SMTP credentials (for email verification)
+## Primeros pasos
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Joel-RD/shortener-url.git
-   cd shortener-url
-   ```
+### Requisitos
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+- Node.js v18 o superior
+- npm
+- Cuenta en Turso (producción) o SQLite local (desarrollo)
+- Credenciales SMTP para envío de emails de verificación
 
-3. Configure environment variables:
-   Copy the example file and fill in your details:
-   ```bash
-   cp .env.example .env
-   ```
+### Instalación
 
-   **Required variables** (see [Environment Variables](#environment-variables) for full list):
-   - `DB_TURSO_URL` / `DB_TURSO_AUTH_TOKEN`: For production Turso database
-   - `JWT_SECRET`: Required in production for signing JWTs
-   - `EMAIL_*`: SMTP credentials for sending verification emails
+```bash
+git clone https://github.com/Joel-RD/erdl-backend.git
+cd erdl-backend
+npm install
+```
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-   The server starts at `http://localhost:3000`.
+### Configuración
+
+```bash
+cp .env.example .env
+```
+
+Edita el archivo `.env` con tus valores. Consulta la sección [Variables de entorno](#variables-de-entorno) para el detalle completo.
+
+### Ejecutar
+
+```bash
+npm run dev
+```
+
+El servidor arranca en `http://localhost:3000`.
 
 ---
 
-## 🔐 Environment Variables
-Copy `.env.example` to `.env` and configure the following:
+## Variables de entorno
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server listening port | 3000 |
-| `NODE_ENV` | `development` or `production` | `development` |
-| `DB_TURSO_URL` | Turso database URL (production only) | Local SQLite path |
-| `DB_TURSO_AUTH_TOKEN` | Turso authentication token (production only) | - |
-| `JWT_SECRET` | Secret key for signing JWTs (required in production) | Random dev secret |
-| `DOMAIN_FOR_FRONTEND` | Allowed CORS origin for frontend requests | `http://localhost:3000` |
-| `HTTP_ONLY` | HttpOnly flag for auth cookies | `true` |
-| `SECURE` | Secure flag for cookies (requires HTTPS) | `true` |
-| `SAME_SITE` | SameSite cookie policy | `lax` |
-| `MAX_AGE` | Cookie max age in milliseconds | 7 days (604800000) |
-| `PATH` | Cookie path | `/` |
-| `EMAIL_HOST` | SMTP host (e.g., `smtp.gmail.com`) | - |
-| `EMAIL_PORT` | SMTP port | - |
-| `EMAIL_SECURE` | Use TLS for SMTP | - |
-| `EMAIL_USER` | SMTP username/email | - |
-| `EMAIL_PASS` | SMTP password/app password | - |
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `PORT` | Puerto del servidor | `3000` |
+| `NODE_ENV` | Entorno: `development` o `production` | `development` |
+| `DB_TURSO_URL` | URL de la base de datos Turso (solo producción) | Ruta SQLite local |
+| `DB_TURSO_AUTH_TOKEN` | Token de autenticación de Turso (solo producción) | — |
+| `JWT_SECRET` | Secreto para firmar JWT (obligatorio en producción) | Secreto aleatorio de desarrollo |
+| `DOMAIN_FOR_FRONTEND` | Origen permitido por CORS | `http://localhost:3000` |
+| `HTTP_ONLY` | Flag HttpOnly para cookies | `true` |
+| `SECURE` | Flag Secure para cookies (solo producción) | `true` en producción |
+| `SAME_SITE` | Política SameSite de cookies | `lax` |
+| `MAX_AGE` | Tiempo de vida de cookies (milisegundos) | 7 días (`604800000`) |
+| `COOKIE_PATH` | Ruta de las cookies | `/` |
+| `EMAIL_HOST` | Host SMTP (ej: `smtp.gmail.com`) | — |
+| `EMAIL_PORT` | Puerto SMTP | — |
+| `EMAIL_SECURE` | Usar TLS para SMTP | — |
+| `EMAIL_USER` | Email/usuario SMTP | — |
+| `EMAIL_PASS` | Contraseña SMTP | — |
 
 ---
 
-## 📜 Available Scripts
-| Script | Description |
+## Scripts disponibles
+
+| Script | Descripción |
 |--------|-------------|
-| `npm run dev` | Start development server with Nodemon hot-reload |
-| `npm run build` | Compile TypeScript to JavaScript in `dist/` |
-| `npm start` | Run production build from `dist/` |
-| `npm test` | Run Jest test suite with experimental VM modules |
-| `npm run stress` | Run stress tests in development mode |
-| `npm run stress:full` | Run stress tests in production mode |
+| `npm run dev` | Servidor de desarrollo con hot-reload (Nodemon) |
+| `npm run build` | Compilar TypeScript a JavaScript en `dist/` |
+| `npm start` | Ejecutar build de producción |
+| `npm test` | Ejecutar suite de tests con Jest |
+| `npm run stress` | Tests de estrés en modo desarrollo |
+| `npm run stress:full` | Tests de estrés en modo producción |
 
 ---
 
-## 📡 API Reference
+## Referencia API
+
 Base URL: `http://localhost:3000/api/v1`
 
-### URL Shortener Endpoints
-| Method | Endpoint | Description | Body Example |
-|--------|----------|-------------|--------------|
-| `POST` | `/short` | Shorten a new URL | `{"orig_url": "https://example.com"}` |
-| `GET` | `/:shortUrl` | Redirect to original URL (302 status) | N/A |
+### Acortamiento de URLs
 
-### Authentication Endpoints
-| Method | Endpoint | Description | Protected |
-|--------|----------|-------------|------------|
-| `POST` | `/auth/register` | Register a new user | ❌ |
-| `POST` | `/auth/login` | Login and set HttpOnly auth cookie | ❌ |
-| `POST` | `/auth/verify-email` | Verify email with verification code | ❌ |
-| `GET` | `/auth/user/profile` | Get authenticated user profile | ✅ |
+| Método | Ruta | Descripción | Rate Limit |
+|--------|------|-------------|------------|
+| `POST` | `/api/v1/short` | Acortar una URL | 5.000/h (prod) |
+| `GET` | `/:shortUrl` | Redirigir a la URL original (302) | 50.000/h (prod) |
 
-### Response Format
-All API responses follow a consistent JSON format:
-- **Success**:
-  ```json
-  {
-    "message": "Operation successful",
-    "data": { ... }
+**POST /api/v1/short**
+
+Cuerpo de la solicitud:
+```json
+{ "orig_url": "https://ejemplo.com/un/recurso/muy/largo" }
+```
+
+Respuesta (200):
+```json
+{
+  "message": "URL acortada con éxito.",
+  "url_acortada": "http://localhost:3000/abc12345"
+}
+```
+
+### Autenticación
+
+| Método | Ruta | Descripción | Protegido | Rate Limit |
+|--------|------|-------------|-----------|------------|
+| `POST` | `/api/v1/auth/register` | Registrar usuario | No | 4/día (prod) |
+| `POST` | `/api/v1/auth/login` | Iniciar sesión | No | 4/día (prod) |
+| `POST` | `/api/v1/auth/verify-email` | Verificar código de email | Temporal | 4/día (prod) |
+| `GET` | `/api/v1/auth/user/profile` | Consultar perfil del usuario | JWT | — |
+
+**POST /api/v1/auth/register**
+
+Cuerpo:
+```json
+{
+  "username": "mi_usuario",
+  "email": "correo@ejemplo.com",
+  "password": "MiContraseña123!"
+}
+```
+
+Respuesta (201):
+```json
+{ "message": "Usuario creado correctamente, código enviado al email" }
+```
+> Se establece la cookie `emailSendToVerifyUser` (2 minutos de duración, contiene un JWT temporal).
+
+**POST /api/v1/auth/login**
+
+Cuerpo:
+```json
+{
+  "email": "correo@ejemplo.com",
+  "password": "MiContraseña123!"
+}
+```
+
+Respuesta (200):
+```json
+{
+  "message": "Inicio de sesión correcto, código enviado al email",
+  "user": {
+    "id": 1,
+    "username": "mi_usuario",
+    "email": "correo@ejemplo.com"
   }
-  ```
-- **Error**:
-  ```json
-  {
-    "error": "Error Type",
-    "message": "Descriptive error message"
-  }
-  ```
+}
+```
+> Se establece la cookie `emailSendToVerifyUser` (2 minutos de duración).
 
-### Common Status Codes
-- `200` / `201`: Success
-- `400`: Bad Request (validation errors)
-- `401`: Unauthorized (invalid/missing token)
-- `404`: Not Found
-- `429`: Too Many Requests (rate limit exceeded)
-- `500`: Internal Server Error
+**POST /api/v1/auth/verify-email**
+
+Cuerpo:
+```json
+{
+  "email": "correo@ejemplo.com",
+  "code": "aB3xY9"
+}
+```
+> Requiere la cookie `emailSendToVerifyUser` previamente establecida (por registro o login).
+
+Respuesta (200):
+```json
+{ "message": "Inicio de sesión correcto." }
+```
+> Se establece la cookie `authTokenAuthorized` (JWT de sesión, 2 días de duración).
+
+**GET /api/v1/auth/user/profile**
+
+> Requiere la cookie `authTokenAuthorized`.
+
+Respuesta (200):
+```json
+{
+  "message": "Perfil consultado correctamente",
+  "user": {
+    "email": "correo@ejemplo.com"
+  }
+}
+```
 
 ---
 
-## 🧪 Testing
-Run the test suite:
+## Flujo de autenticación
+
+El sistema utiliza un proceso de 3 pasos con verificación de email:
+
+1. **Registro o Login** → se envía un código de 6 caracteres por email y se establece una cookie temporal (`emailSendToVerifyUser`, JWT con 2 minutos de duración).
+
+2. **Verificación del código** → el cliente envía el código recibido. Se valida contra la cookie temporal y el cuerpo de la solicitud. Si es correcto, se establece la cookie de sesión (`authTokenAuthorized`, JWT con 2 días de duración).
+
+3. **Rutas protegidas** → el middleware `authJWT` valida la cookie `authTokenAuthorized` en cada petición a rutas protegidas.
+
+> Si el usuario intenta login o registro mientras tiene un código de verificación activo, recibe un error 429 con el tiempo restante en minutos.
+
+---
+
+## Formato de respuestas
+
+**Éxito:**
+```json
+{ "message": "Operación exitosa", ... }
+```
+
+**Error de aplicación (`AppError`):**
+```json
+{ "message": "Descripción del error" }
+```
+
+**Error con detalles:**
+```json
+{
+  "message": "Descripción del error",
+  "details": { "retryAfterMinutes": 45 }
+}
+```
+
+**Ruta no encontrada:**
+```json
+{
+  "error": "Not Found",
+  "message": "Ruta POST /ruta/inexistente no encontrada"
+}
+```
+
+**Error interno:**
+```json
+{
+  "error": "Internal Server Error",
+  "message": "Ocurrió un error inesperado"
+}
+```
+
+### Códigos de estado
+
+| Código | Significado |
+|--------|-------------|
+| `200` / `201` | Operación exitosa |
+| `400` | Solicitud incorrecta (validación) |
+| `401` | No autorizado (token faltante, expirado o inválido) |
+| `403` | Prohibido (token no corresponde al email) |
+| `404` | Recurso no encontrado |
+| `409` | Conflicto (email ya registrado) |
+| `410` | Gone (URL de destino no permitida) |
+| `429` | Demasiadas solicitudes (rate limit o límite de intentos) |
+| `500` | Error interno del servidor |
+
+---
+
+## Seguridad
+
+| Mecanismo | Detalle |
+|-----------|---------|
+| **Helmet** | Cabeceras HTTP seguras (CSP y cross-origin en producción) |
+| **CORS** | Solo permite el origen configurado en `DOMAIN_FOR_FRONTEND` |
+| **Rate limiting** | Por IP: 5.000/h shorten, 50.000/h redirect, 4/día auth (producción) |
+| **Bloqueo de intentos** | 5 intentos máximos → bloqueo de 2 h (email/contraseña) o 1 h (código) |
+| **Cookies HttpOnly** | JWT almacenado en cookies HttpOnly, SameSite, Secure en producción |
+| **Contraseñas** | Bcryptjs con 10 rounds; mínimo 12 caracteres, mayúscula, minúscula, número y carácter especial |
+| **Validación de URLs** | Anti-SSRF: solo http/https, sin IPs privadas/localhost, sin credenciales, TLD válido |
+| **JWT de dos tipos** | Temporal (2 min, para verificación) y de sesión (2 días, para autenticación) |
+| **Entorno** | `JWT_SECRET` obligatorio en producción; en desarrollo se genera uno aleatorio |
+
+---
+
+## Testing
+
 ```bash
 npm test
 ```
-Uses Jest with Supertest for integration testing. Test files are located in the `test/` directory.
+
+- **Framework**: Jest con preset ESM (`ts-jest`)
+- **HTTP tests**: Supertest
+- **Cobertura**: directorio `coverage/`
+- **Configuración global**: `test/setup.ts` (establece `NODE_ENV=test`, `JWT_SECRET`, `STRESS_TEST=true`)
+- **Ubicación**: `test/src/` (unitarios de controllers, services, repository, middleware, utils)
+
+### Tests de estrés
+
+```bash
+npm run stress        # Modo desarrollo (rate limits deshabilitados)
+npm run stress:full   # Modo producción
+```
+
+- **Herramienta**: autocannon
+- **Configuración**: 500 conexiones, 60 segundos, flujo encadenado POST → GET
+- **Mide**: peticiones/seg, latencia promedio/máxima, respuestas 2xx/3xx/4xx/5xx
 
 ---
 
-## 🔒 Security Practices
-- **Helmet**: Sets secure HTTP headers to prevent common vulnerabilities
-- **CORS**: Configured to only allow trusted frontend origins
-- **Rate Limiting**: Prevents abuse of URL shortening endpoints
-- **HttpOnly Cookies**: JWT tokens are stored in HttpOnly, Secure, SameSite cookies to prevent XSS
-- **Password Hashing**: Uses bcryptjs to hash passwords before storage
-- **Environment Validation**: Throws errors if required production variables are missing
+## Licencia
 
----
-
-## 📄 License
-This project is licensed under the ISC License.
+Este proyecto está bajo la licencia ISC.

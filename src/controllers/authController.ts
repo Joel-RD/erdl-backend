@@ -1,110 +1,51 @@
 import { Response, Request } from "express";
-import { AuthRepository } from "../repository/authRepository.js"
-import { emailService } from "../services/sendEmails.js"
-import { turso } from "../Database/databases.js"
-import { validateRegistration } from "../utils/validateUserData.js"
-import { hashPassword, comparePassword } from "../utils/password_encrypt.js"
-import { generateVerificationCode } from "../utils/codeValidatedEmail.js"
+import { AuthService } from "../services/authService.js"
 import { config } from "../config.js"
-import { emailValidJWToken, userAuthJWToken } from "../utils/jwt.js"
-import logger from "../utils/logger.js";
 
-// const authControllerRepository = new AuthRepository(turso);
 const { configCookiesParams } = config;
 
 export class AuthController {
-    constructor(private authControllerRepository: AuthRepository) { }
+    constructor(private authService: AuthService) { }
 
     authRegisterController = async (req: Request, res: Response) => {
-        try {
-            if (!req.body) {
-                logger.error("authRegisterController: req.body is undefined");
-                return res.status(409).json({ message: "Request body is missing" });
-            }
-
-            const { username, email, password } = req.body;
-            const validation = validateRegistration({ username, email, password });
-            if (!validation.isValid) {
-                return res.status(401).json({
-                    message: "Validation failed",
-                    errors: validation.errors
-                });
-            }
-
-            const existingEmail = await this.authControllerRepository.findByEmail(email);
-            if (existingEmail)
-                return res.status(409).json({ message: "Email already in use" });
-
-            const passwordHash = await hashPassword(password);
-            const success = await this.authControllerRepository.create({username,email,passwordHash});
-
-            if (!success) return res.status(500).json({ message: "Error creating user" });
-
-            res.status(201).json({message: "User created successfully"});
-        } catch (error) {
-            logger.error("Error in creater user processing: ", error);
-            res.status(500).json({ message: "Error al crear el usuario" });
+        if (!req.body) {
+            return res.status(409).json({ message: "El cuerpo de la solicitud es obligatorio" });
         }
+
+        const { username, email, password } = req.body;
+        const { tempToken } = await this.authService.register({ username, email, password });
+
+        res.cookie("emailSendToVerifyUser", JSON.stringify({ token: tempToken }), {
+            ...configCookiesParams,
+            maxAge: 2 * 60 * 1000
+        });
+
+        res.status(201).json({ message: "Usuario creado correctamente, código enviado al email" });
     }
 
     authLoginController = async (req: Request, res: Response) => {
-        try {
-            if (!req.body) return res.status(409).json({ message: "Request body is missing" });
-
-            const { email, password } = req.body;
-
-            const validation = validateRegistration({ email, password });
-            if (!validation.isValid) return res.status(401).json({message: "Validation failed",errors: validation.errors});
-            
-            const user = await this.authControllerRepository.findByEmail(email);
-            if (!user) return res.status(404).json({ message: "User not found." });
-
-            const passwordMatch = await comparePassword(password, user.password_hash);
-            if (!passwordMatch) return res.status(401).json({ message: "Invalid password." });
-
-            const activeCode = await this.authControllerRepository.getActiveVerificationCode(email);
-            if (activeCode) {
-                const expiresAt = new Date(activeCode.expires_at);
-                const now = new Date();
-                const minutesLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / 60000);
-                return res.status(429).json({ 
-                    message: "Ya hay un código de verificación activo.", 
-                    remainingMinutes: minutesLeft 
-                });
-            }
-
-            const validCode = generateVerificationCode();
-            await this.authControllerRepository.savedVerificationCode(email, validCode);
-            emailService.sendVerificationEmail(email, validCode);
-            res.status(200).json({ message: "Login successful", user: {
-                id: user.id,
-                username: user.name,
-                email: user.email
-            }});
-        } catch (error) {
-            logger.error("Error in authLoginController:", error);
-            res.status(500).json({ message: "Error in login process." });
+        if (!req.body) {
+            return res.status(409).json({ message: "El cuerpo de la solicitud es obligatorio" });
         }
+
+        const { email, password } = req.body;
+        const { tempToken, user } = await this.authService.login({ email, password });
+
+        res.cookie("emailSendToVerifyUser", JSON.stringify({ token: tempToken }), {
+            ...configCookiesParams,
+            maxAge: 2 * 60 * 1000
+        });
+        res.status(200).json({ message: "Inicio de sesión correcto, código enviado al email", user });
     }
 
     postAuthVerifyEmailController = async (req: Request, res: Response) => {
-        try {
-            const { code, email } = req.body;
-            if (!email || !code) return res.status(400).json({ message: "Code or Email is required." });
-
-            const user = await this.authControllerRepository.findByEmail(email);
-            if (!user) return res.status(404).json({ message: "User not found." });
-            
-            const codeMatch = await this.authControllerRepository.verifyVerificationCode(email, code);
-            if (!codeMatch) return res.status(404).json({ message: "Invalid code." });
-            
-            await this.authControllerRepository.updateUsedVerificationCode(email);
-            const token = userAuthJWToken(email);
-            res.cookie("authTokenAuthorized", token, configCookiesParams);
-            res.status(200).json({ message: "Login successful." });
-        } catch (error) {
-            logger.error("Error in postAuthVerifyEmailController:", error);
-            res.status(500).json({ message: "Error in verification process." });
+        const { code, email } = req.body;
+        if (!email || !code) {
+            return res.status(400).json({ message: "El código y el email son obligatorios" });
         }
+
+        const { authToken } = await this.authService.verifyEmailCode({ email, code });
+        res.cookie("authTokenAuthorized", authToken, configCookiesParams);
+        res.status(200).json({ message: "Inicio de sesión correcto." });
     }
 }

@@ -4,49 +4,16 @@
  * @returns objeto con isValid y mensaje de error si aplica
  */
 export function validateEmail(email: string): { isValid: boolean; error?: string } {
-    // Lista de dominios permitidos (proveedores más importantes del mundo)
-    const allowedDomains = [
-        'gmail.com',
-        'outlook.com',
-        'hotmail.com',
-        'yahoo.com',
-        'icloud.com',
-        'protonmail.com',
-        'aol.com',
-        'zoho.com',
-        'mail.com',
-        'gmx.com',
-        'yandex.com',
-        'live.com',
-        'msn.com',
-        'me.com',
-        'mac.com'
-    ];
-
-    // Validar que el email no esté vacío
     if (!email || email.trim() === '') {
         return { isValid: false, error: 'El email no puede estar vacío' };
     }
 
-    // Expresión regular robusta para validar formato de email
     const emailRegex = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
     if (!emailRegex.test(email)) {
         return { isValid: false, error: 'Formato de email inválido' };
     }
 
-    // Extraer el dominio del email
-    const domain = email.split('@')[1].toLowerCase();
-
-    // Verificar que el dominio esté en la lista permitida
-    if (!allowedDomains.includes(domain)) {
-        return {
-            isValid: false,
-            error: `Dominio no permitido. Solo se aceptan: ${allowedDomains.join(', ')}`
-        };
-    }
-
-    // Validaciones adicionales de seguridad
     if (email.length > 254) {
         return { isValid: false, error: 'El email excede la longitud máxima permitida' };
     }
@@ -56,12 +23,10 @@ export function validateEmail(email: string): { isValid: boolean; error?: string
         return { isValid: false, error: 'La parte local del email es demasiado larga' };
     }
 
-    // Verificar que no tenga puntos consecutivos
     if (email.includes('..')) {
         return { isValid: false, error: 'El email no puede contener puntos consecutivos' };
     }
 
-    // Verificar que no empiece o termine con punto
     if (localPart.startsWith('.') || localPart.endsWith('.')) {
         return { isValid: false, error: 'El email no puede empezar o terminar con punto' };
     }
@@ -117,7 +82,7 @@ export function validatePassword(password: string): {
     // Validar al menos un carácter especial
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
         errors.push('Debe contener al menos un carácter especial (!@#$%^&*...)');
-    } 
+    }
 
     // Validar que no contenga espacios
     if (/\s/.test(password)) {
@@ -169,9 +134,9 @@ export function validateRegistration(data: {
     const errors: string[] = [];
 
     // Validar username
-    // if (!data.username || data.username.trim().length < 3) {
-    //     errors.push('El nombre de usuario debe tener al menos 3 caracteres');
-    // }
+    if (data.username && data.username.trim().length < 3) {
+        errors.push('El nombre de usuario debe tener al menos 3 caracteres');
+    }
 
     // Validar email
     const emailValidation = validateEmail(data.email);
@@ -198,3 +163,186 @@ export function validateRegistration(data: {
         errors
     };
 }
+
+import { isIP } from "node:net";
+
+/**
+ * Determina si una dirección IPv4 pertenece a rangos privados o reservados
+ * @param ip - Dirección IPv4
+ */
+function isPrivateIPv4(ip: string): boolean {
+    const [a, b] = ip.split(".").map(Number);
+    if (a === undefined || b === undefined) return false;
+    return (
+        a === 0 ||                             // 0.0.0.0/8
+        a === 10 ||                            // 10.0.0.0/8
+        a === 100 && b >= 64 && b <= 127 ||    // 100.64.0.0/10 (CGNAT)
+        a === 127 ||                           // 127.0.0.0/8 (loopback)
+        a === 169 && b === 254 ||              // 169.254.0.0/16 (link-local)
+        a === 172 && b >= 16 && b <= 31 ||     // 172.16.0.0/12
+        a === 192 && b === 168 ||              // 192.168.0.0/16
+        a >= 224                               // multicast y reservado
+    );
+}
+
+/**
+ * Determina si una dirección IPv6 pertenece a rangos privados o reservados
+ * @param ip - Dirección IPv6
+ */
+function isPrivateIPv6(ip: string): boolean {
+    const lower = ip.toLowerCase();
+
+    if (lower === "::1") return true;                                          // loopback
+
+    if (lower.startsWith("fc") || lower.startsWith("fd")) return true;          // fc00::/7 (ULA)
+
+    if (lower.startsWith("fe8") || lower.startsWith("fe9") ||                   // fe80::/10 (link-local)
+        lower.startsWith("fea") || lower.startsWith("feb")) return true;
+
+    const mapped = lower.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)/);                // IPv4-mapped
+    if (mapped && mapped[1]) return isPrivateIPv4(mapped[1]);
+
+    return false;
+}
+
+/**
+ * Validar urls,para que no sean maliciosos
+ * @param original_url - Url
+ */
+export function validateDomain(original_url: string): { isValid: boolean; error?: string } {
+    if (typeof original_url !== "string" || original_url.trim() === "") {
+        return {
+            isValid: false,
+            error: "La URL no puede estar vacía"
+        };
+    }
+
+    if (original_url.length > 2048) {
+        return {
+            isValid: false,
+            error: "La URL excede la longitud máxima permitida (2048 caracteres)"
+        };
+    }
+
+    if (/[\s\x00-\x1F\x7F]/.test(original_url)) {
+        return {
+            isValid: false,
+            error: "La URL no puede contener espacios ni caracteres de control"
+        };
+    }
+
+    if (original_url.includes("\\")) {
+        return {
+            isValid: false,
+            error: "La URL no puede contener barras invertidas"
+        };
+    }
+
+    let url: URL;
+    try {
+        url = new URL(original_url);
+    } catch {
+        return {
+            isValid: false,
+            error: "La URL no tiene un formato válido"
+        };
+    }
+
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+        return {
+            isValid: false,
+            error: "El Scheme solo permite http/https"
+        };
+    }
+
+    if (!url.hostname) {
+        return {
+            isValid: false,
+            error: "La URL debe incluir un dominio"
+        };
+    }
+
+    if (url.username || url.password) {
+        return {
+            isValid: false,
+            error: "La URL no puede incluir credenciales (user:password@)"
+        };
+    }
+
+    const hostname = url.hostname;
+
+    if (hostname.length > 253) {
+        return {
+            isValid: false,
+            error: "El dominio excede la longitud máxima permitida"
+        };
+    }
+
+    const ipHost = hostname.startsWith("[") && hostname.endsWith("]")
+        ? hostname.slice(1, -1)
+        : hostname;
+
+    const ipType = isIP(ipHost);
+    if (ipType === 4 || ipType === 6) {
+        const isPrivate = ipType === 4
+            ? isPrivateIPv4(ipHost)
+            : isPrivateIPv6(ipHost);
+
+        if (isPrivate) {
+            return {
+                isValid: false,
+                error: "La URL no puede apuntar a IPs privadas o internas"
+            };
+        }
+return { isValid: true };
+}
+
+    const lowerHost = hostname.toLowerCase();
+    if (
+        lowerHost === "localhost" ||
+        lowerHost === "localhost.localdomain" ||
+        lowerHost.endsWith(".localhost") ||
+        lowerHost.endsWith(".local") ||
+        lowerHost.endsWith(".internal")
+    ) {
+        return {
+            isValid: false,
+            error: "La URL no puede apuntar a hosts locales o internos"
+        };
+    }
+
+    if (/^[\d.]+$/.test(hostname) || /^0x[0-9a-f]+$/i.test(hostname)) {
+        return {
+            isValid: false,
+            error: "La URL no puede apuntar a direcciones IP"
+        };
+    }
+
+    if (/[^a-z0-9-.]/i.test(hostname) || hostname.includes("..")) {
+        return {
+            isValid: false,
+            error: "El dominio contiene caracteres o formato inválido"
+        };
+    }
+
+    const labels = hostname.split(".");
+    if (labels.some(label => !label || label.length > 63 || label.startsWith("-") || label.endsWith("-"))) {
+        return {
+            isValid: false,
+            error: "El dominio contiene segmentos inválidos"
+        };
+    }
+
+    const tld = labels[labels.length - 1] ?? "";
+    if (!/^[a-z]{2,}$/i.test(tld)) {
+        return {
+            isValid: false,
+            error: "El dominio debe tener un TLD válido (al menos 2 letras)"
+        };
+    }
+
+    return { isValid: true };
+}
+
+/** Alias de compatibilidad para `validateDomain` */
+export const validateDonmail = validateDomain;
