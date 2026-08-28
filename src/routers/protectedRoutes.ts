@@ -1,5 +1,5 @@
 import { Router, Response } from "express";
-import { authJWT } from "../Middleware/authJWT.js"
+import { authJWT } from "../middleware/authJWT.js"
 import { RequestModel as Request } from "../models/types.js";
 
 const router = Router();
