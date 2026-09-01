@@ -1,15 +1,17 @@
-import { Response, Request } from "express";
+import { Response, Request, NextFunction } from "express";
 import { AuthService } from "../services/authService.js"
 import { config } from "../config.js"
+import { AppError } from "../utils/AppError.js";
+import { sendOk } from "../utils/responseFormat.js";
 
 const { configCookiesParams } = config;
 
 export class AuthController {
     constructor(private authService: AuthService) { }
 
-    authRegisterController = async (req: Request, res: Response) => {
+    authRegisterController = async (req: Request, res: Response, next: NextFunction) => {
         if (!req.body) {
-            return res.status(409).json({ message: "El cuerpo de la solicitud es obligatorio" });
+            return next(new AppError(409, "El cuerpo de la solicitud es obligatorio"));
         }
 
         const { username, email, password } = req.body;
@@ -20,12 +22,12 @@ export class AuthController {
             maxAge: 2 * 60 * 1000
         });
 
-        res.status(201).json({ message: "Usuario creado correctamente, código enviado al email" });
+        return sendOk(res, undefined, "Usuario creado correctamente, código enviado al email", 201);
     }
 
-    authLoginController = async (req: Request, res: Response) => {
+    authLoginController = async (req: Request, res: Response, next: NextFunction) => {
         if (!req.body) {
-            return res.status(409).json({ message: "El cuerpo de la solicitud es obligatorio" });
+            return next(new AppError(409, "El cuerpo de la solicitud es obligatorio"));
         }
 
         const { email, password } = req.body;
@@ -35,17 +37,17 @@ export class AuthController {
             ...configCookiesParams,
             maxAge: 2 * 60 * 1000
         });
-        res.status(200).json({ message: "Inicio de sesión correcto, código enviado al email", user });
+        return sendOk(res, { user }, "Inicio de sesión correcto, código enviado al email");
     }
 
-    postAuthVerifyEmailController = async (req: Request, res: Response) => {
+    postAuthVerifyEmailController = async (req: Request, res: Response, next: NextFunction) => {
         const { code, email } = req.body;
         if (!email || !code) {
-            return res.status(400).json({ message: "El código y el email son obligatorios" });
+            return next(new AppError(400, "El código y el email son obligatorios"));
         }
 
         const { authToken } = await this.authService.verifyEmailCode({ email, code });
         res.cookie("authTokenAuthorized", authToken, configCookiesParams);
-        res.status(200).json({ message: "Inicio de sesión correcto." });
+        return sendOk(res, undefined, "Inicio de sesión correcto.");
     }
 }

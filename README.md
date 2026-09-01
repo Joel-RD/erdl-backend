@@ -36,7 +36,7 @@
 | **Rate limiting** | Protección por IP en cada endpoint |
 | **Seguridad** | Helmet, CORS configurable, cookies HttpOnly/SameSite, bcryptjs (10 rounds) |
 | **Logging** | Winston estructurado con archivos rotativos (5 MB) y Morgan en desarrollo |
-| **Manejo de errores** | `AppError` con códigos de estado y detalles consistentes |
+| **Manejo de errores** | Formato de respuesta unificado `{ success, message, data }` / `{ success, error: { code, message, details } }` vía `AppError` y `responseFormat` |
 
 ---
 

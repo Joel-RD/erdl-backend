@@ -42,8 +42,11 @@ Valida la URL de destino (anti-SSRF), genera un identificador único de 8 caract
 
 ```json
 {
+  "success": true,
   "message": "URL acortada con éxito.",
-  "url_acortada": "http://localhost:3000/abc12345"
+  "data": {
+    "url_acortada": "http://localhost:3000/abc12345"
+  }
 }
 ```
 
@@ -85,7 +88,10 @@ El sistema usa un proceso de **3 pasos** con verificación de email por código:
 **Respuesta `201 Created`:**
 
 ```json
-{ "message": "Usuario creado correctamente, código enviado al email" }
+{
+  "success": true,
+  "message": "Usuario creado correctamente, código enviado al email"
+}
 ```
 
 > Se establece la cookie `emailSendToVerifyUser` (2 minutos de duración, contiene un JWT temporal).
@@ -105,11 +111,14 @@ El sistema usa un proceso de **3 pasos** con verificación de email por código:
 
 ```json
 {
+  "success": true,
   "message": "Inicio de sesión correcto, código enviado al email",
-  "user": {
-    "id": 1,
-    "username": "mi_usuario",
-    "email": "correo@ejemplo.com"
+  "data": {
+    "user": {
+      "id": 1,
+      "username": "mi_usuario",
+      "email": "correo@ejemplo.com"
+    }
   }
 }
 ```
@@ -132,7 +141,7 @@ Requiere la cookie `emailSendToVerifyUser` previamente establecida (por registro
 **Respuesta `200 OK`:**
 
 ```json
-{ "message": "Inicio de sesión correcto." }
+{ "success": true, "message": "Inicio de sesión correcto." }
 ```
 
 > Se establece la cookie `authTokenAuthorized` (JWT de sesión, 2 días de duración).
@@ -145,9 +154,12 @@ Requiere la cookie `authTokenAuthorized`.
 
 ```json
 {
+  "success": true,
   "message": "Perfil consultado correctamente",
-  "user": {
-    "email": "correo@ejemplo.com"
+  "data": {
+    "user": {
+      "email": "correo@ejemplo.com"
+    }
   }
 }
 ```
@@ -156,24 +168,44 @@ Requiere la cookie `authTokenAuthorized`.
 
 ## Formato de respuestas
 
+Todas las respuestas de la API usan un envoltorio unificado construido por `src/utils/responseFormat.ts` (helpers `sendOk` y `buildErrorBody`). El campo `message` se mantiene en la raíz por compatibilidad con clientes existentes.
+
 **Éxito:**
 
 ```json
-{ "message": "Operación exitosa", ... }
+{
+  "success": true,
+  "message": "Operación exitosa",
+  "data": { }
+}
 ```
+
+> `data` solo se incluye cuando el endpoint devuelve un payload (p. ej. `user`, `url_acortada`).
 
 **Error de aplicación (`AppError`):**
 
 ```json
-{ "message": "Descripción del error" }
+{
+  "success": false,
+  "message": "Descripción del error",
+  "error": {
+    "code": "BAD_REQUEST",
+    "message": "Descripción del error"
+  }
+}
 ```
 
 **Error con detalles:**
 
 ```json
 {
+  "success": false,
   "message": "Descripción del error",
-  "details": { "retryAfterMinutes": 45 }
+  "error": {
+    "code": "TOO_MANY_REQUESTS",
+    "message": "Descripción del error",
+    "details": { "retryAfterMinutes": 45 }
+  }
 }
 ```
 
@@ -181,8 +213,12 @@ Requiere la cookie `authTokenAuthorized`.
 
 ```json
 {
-  "error": "Not Found",
-  "message": "Ruta POST /ruta/inexistente no encontrada"
+  "success": false,
+  "message": "Ruta POST /ruta/inexistente no encontrada",
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Ruta POST /ruta/inexistente no encontrada"
+  }
 }
 ```
 
@@ -190,10 +226,31 @@ Requiere la cookie `authTokenAuthorized`.
 
 ```json
 {
-  "error": "Internal Server Error",
-  "message": "Ocurrió un error inesperado"
+  "success": false,
+  "message": "Ocurrió un error inesperado",
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Ocurrió un error inesperado"
+  }
 }
 ```
+
+> **Nota de compatibilidad:** en errores el antiguo campo raíz `string error` ("Not Found") ahora es un objeto `error` estructurado (`{ code, message }`). Los payloads `user` y `url_acortada` migraron a `data`.
+
+### Códigos de error estándar
+
+| `error.code` | Status | Significado |
+|--------------|--------|-------------|
+| `BAD_REQUEST` | `400` | Solicitud incorrecta (validación) |
+| `UNAUTHORIZED` | `401` | No autorizado (token faltante, expirado o inválido) |
+| `FORBIDDEN` | `403` | Prohibido (token no corresponde al email) |
+| `NOT_FOUND` | `404` | Recurso no encontrado |
+| `CONFLICT` | `409` | Conflicto (email ya registrado) |
+| `GONE` | `410` | Gone (URL de destino no permitida) |
+| `TOO_MANY_REQUESTS` | `429` | Demasiadas solicitudes (rate limit o límite de intentos) |
+| `INTERNAL_SERVER_ERROR` | `500` | Error interno del servidor |
+
+Los `AppError` pueden además definir códigos semánticos específicos (p. ej. `TOKEN_EXPIRED`, `TOKEN_MISSING`, `RATE_LIMITED`, `EMAIL_ALREADY_REGISTERED`).
 
 ### Códigos de estado
 

@@ -42,6 +42,22 @@ export interface UserAuthData {
     password_blocked_until?: string | null;
 }
 
+export interface ApiSuccess<T = unknown> {
+    success: true;
+    message?: string;
+    data?: T;
+}
+
+export interface ApiErrorBody {
+    success: false;
+    message: string;
+    error: {
+        code: string;
+        message: string;
+        details?: unknown;
+    };
+}
+
 export interface IAuthRepository {
     findByEmail(email: string): Promise<UserAuthData | null>;
     create(user: {

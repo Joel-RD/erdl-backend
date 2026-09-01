@@ -18,7 +18,7 @@ export class AuthService {
     async register(input: { username: string; email: string; password: string }): Promise<{ tempToken: string }> {
         const validation = validateRegistration(input);
         if (!validation.isValid) {
-            throw new AppError(401, "Los datos de registro no son válidos", validation.errors);
+            throw new AppError(401, "Los datos de registro no son válidos", validation.errors, "INVALID_REGISTRATION_DATA");
         }
 
         const emailBlock = await this.repository.checkBlocked("email", input.email);
@@ -31,7 +31,7 @@ export class AuthService {
         const existingEmail = await this.repository.findByEmail(input.email);
         await this.repository.registerAttempt("email", input.email);
         if (existingEmail) {
-            throw new AppError(409, "El email ya está registrado");
+            throw new AppError(409, "El email ya está registrado", undefined, "EMAIL_ALREADY_REGISTERED");
         }
 
         const passwordHash = await hashPassword(input.password);
@@ -49,7 +49,7 @@ export class AuthService {
     async login(input: { email: string; password: string }): Promise<{ tempToken: string; user: LoginUser }> {
         const emailValidation = validateEmail(input.email);
         if (!emailValidation.isValid || !input.password || input.password.trim() === "") {
-            throw new AppError(401, "Credenciales no válidas", emailValidation.isValid ? undefined : [emailValidation.error]);
+            throw new AppError(401, "Credenciales no válidas", emailValidation.isValid ? undefined : [emailValidation.error], "INVALID_CREDENTIALS");
         }
 
         const emailBlock = await this.repository.checkBlocked("email", input.email);
@@ -62,7 +62,7 @@ export class AuthService {
         const user = await this.repository.findByEmail(input.email);
         await this.repository.registerAttempt("email", input.email);
         if (!user) {
-            throw new AppError(404, "Email no encontrado");
+            throw new AppError(404, "Email no encontrado", undefined, "EMAIL_NOT_FOUND");
         }
 
         const passwordBlock = await this.repository.checkBlocked("password", input.email);
@@ -75,7 +75,7 @@ export class AuthService {
         const passwordMatch = await comparePassword(input.password, user.password_hash);
         if (!passwordMatch) {
             await this.repository.registerAttempt("password", input.email);
-            throw new AppError(401, "Contraseña incorrecta");
+            throw new AppError(401, "Contraseña incorrecta", undefined, "WRONG_PASSWORD");
         }
 
         await this.repository.resetAttempts("email", input.email);
@@ -85,7 +85,7 @@ export class AuthService {
         if (activeCode) {
             const expiresAt = new Date(activeCode.expires_at);
             const minutesLeft = Math.ceil((expiresAt.getTime() - Date.now()) / 60000);
-            throw new AppError(429, "Ya hay un código de verificación activo.", { remainingMinutes: minutesLeft });
+            throw new AppError(429, "Ya hay un código de verificación activo.", { remainingMinutes: minutesLeft }, "VERIFICATION_CODE_ACTIVE");
         }
 
         const validCode = generateVerificationCode();
@@ -108,13 +108,13 @@ export class AuthService {
 
         const user = await this.repository.findByEmail(input.email);
         if (!user) {
-            throw new AppError(404, "Email no encontrado");
+            throw new AppError(404, "Email no encontrado", undefined, "EMAIL_NOT_FOUND");
         }
 
         const codeMatch = await this.repository.verifyVerificationCode(input.email, input.code);
         if (!codeMatch) {
             await this.repository.registerAttempt("code", input.email);
-            throw new AppError(404, "Código de verificación incorrecto");
+            throw new AppError(404, "Código de verificación incorrecto", undefined, "INCORRECT_VERIFICATION_CODE");
         }
 
         await this.repository.resetAttempts("code", input.email);

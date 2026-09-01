@@ -267,18 +267,22 @@ El proceso cubre ambas operaciones del servicio: acortar (`POST /api/v1/short`) 
 class AppError extends Error {
     statusCode: number;
     details?: unknown;
+    code: string; // código estándar (BAD_REQUEST, NOT_FOUND, ...) o semántico (TOKEN_MISSING, RATE_LIMITED, ...)
 }
 ```
 
-Los services lanzan `AppError` con el código de estado y mensaje apropiado. El middleware `errorHandler` los captura y retorna la respuesta JSON correspondiente.
+Los services lanzan `AppError` con el código de estado, mensaje apropiado y, opcionalmente, un `code` específico. El middleware `errorHandler` los captura y retorna la respuesta JSON unificada vía `buildErrorBody()` (`src/utils/responseFormat.ts`).
 
-### Respuestas de error
+### Respuestas
+
+Todas las rutas usan los helpers de `src/utils/responseFormat.ts`: `sendOk()` para éxitos y `buildErrorBody()` para errores, garantizando un único formato en toda la API.
 
 | Tipo | Formato |
 |------|---------|
-| `AppError` | `{ message: "..." }` o `{ message: "...", details: {...} }` |
-| Ruta no encontrada | `{ error: "Not Found", message: "Ruta METHOD /path no encontrada" }` |
-| Error no controlado | `{ error: "Internal Server Error", message: "Ocurrió un error inesperado" }` |
+| Éxito | `{ success: true, message: "...", data: {...} }` |
+| `AppError` | `{ success: false, message: "...", error: { code, message, details? } }` |
+| Ruta no encontrada | `{ success: false, message: "Ruta METHOD /path no encontrada", error: { code: "NOT_FOUND", message: "..." } }` |
+| Error no controlado | `{ success: false, message: "Ocurrió un error inesperado", error: { code: "INTERNAL_SERVER_ERROR", message: "..." } }` |
 
 > **Nota:** el detalle de los formatos y códigos de estado está en la [Referencia de la API](API.md).
 
