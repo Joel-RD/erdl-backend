@@ -12,10 +12,10 @@
 | **CORS** | Solo permite el origen configurado en `DOMAIN_FOR_FRONTEND` |
 | **Rate limiting** | Por IP: 5.000/h shorten, 50.000/h redirect, 4/día auth (producción) |
 | **Bloqueo de intentos** | 5 intentos máximos → bloqueo de 2 h (email/contraseña) o 1 h (código) |
-| **Cookies HttpOnly** | JWT almacenado en cookies HttpOnly, SameSite, Secure en producción |
+| **Cookie HttpOnly (verificación)** | El código de verificación usa la cookie temporal `emailSendToVerifyUser` (HttpOnly, SameSite, Secure en producción); el JWT de sesión viaja en el header `Authorization: Bearer` |
 | **Contraseñas** | Bcryptjs con 10 rounds; mínimo 12 caracteres con requisitos de complejidad |
 | **Validación de URLs** | Anti-SSRF: solo http/https, sin IPs privadas/localhost, sin credenciales, TLD válido |
-| **JWT de dos tipos** | Temporal (2 min, para verificación) y de sesión (2 días, para autenticación) |
+| **JWT de dos tipos** | Temporal (2 min, para verificación en cookie) y de sesión (2 días, para autenticación en header) |
 | **Entorno** | `JWT_SECRET` obligatorio en producción; en desarrollo se genera uno aleatorio |
 
 ---
@@ -28,7 +28,7 @@ Configurados en `src/main.ts`:
 |-----------|---------|
 | **Helmet** | Cabeceras HTTP seguras (CSP y cross-origin solo en producción) |
 | **CORS** | Origen restringido a `DOMAIN_FOR_FRONTEND` con `credentials: true` |
-| **Cookie Parser** | Parseo de cookies para la validación JWT |
+| **Cookie Parser** | Parseo de cookies para la verificación temporal de email |
 | **express.json** | Parseo de cuerpos JSON |
 | **express.urlencoded** | Parseo de cuerpos URL-encoded |
 | **Morgan** | Logging HTTP en desarrollo (se omite con `SKIP_LOGS=true`) |
@@ -39,7 +39,7 @@ Middlewares específicos de rutas:
 
 - **`limitAuthButton`** — rate limiting en endpoints de auth
 - **`redirectShort`** / **`url_Short`** — rate limiting en endpoints de URLs
-- **`authJWT`** — validación de JWT en rutas protegidas
+- **`authJWT`** — validación del `Authorization: Bearer <token>` en rutas protegidas
 - **`verifySendToEmail`** — validación de la cookie temporal de verificación
 
 ---
@@ -73,14 +73,17 @@ Configurado en `src/utils/attemptLimiter.ts`:
 
 ---
 
-## Cookies
+## Cookies y transporte del JWT de sesión
+
+Solo el **código temporal de verificación** se almacena en una cookie:
 
 | Cookie | Contenido | Duración | HttpOnly | Secure | SameSite |
 |--------|-----------|----------|----------|--------|----------|
 | `emailSendToVerifyUser` | JSON `{ token: <JWT temporal> }` | 2 minutos | Sí | Sí (prod) | `lax` |
-| `authTokenAuthorized` | JWT de sesión | Configurable (default 7 días) | Sí | Sí (prod) | `lax` |
 
-Configuración base en `src/config.ts` → `configCookiesParams`:
+El **JWT de sesión** no se guarda en cookies: se devuelve en el campo `data.authToken` de la respuesta de `POST /api/v1/auth/verify-email` y el cliente debe enviarlo en el header `Authorization: Bearer <token>` en las rutas protegidas.
+
+Configuración base en `src/config.ts` → `configCookiesParams` (aplica a la cookie temporal):
 
 - `httpOnly`: `true` (a menos que `HTTP_ONLY=false`)
 - `secure`: `true` solo en producción (`NODE_ENV=production`)
@@ -95,8 +98,8 @@ Dos tipos de token, ambos firmados con `JWT_SECRET`:
 
 | Token | Función | Expiración | Payload |
 |-------|---------|------------|---------|
-| `emailValidJWToken` | Temporal para verificación de email | 2 minutos | `{ userEmail }` |
-| `userAuthJWToken` | Sesión de autenticación | 2 días | `{ userEmail }` |
+| `emailValidJWToken` | Temporal para verificación de email (se envía dentro de la cookie `emailSendToVerifyUser`) | 2 minutos | `{ userEmail }` |
+| `userAuthJWToken` | Sesión de autenticación (viaja en el header `Authorization: Bearer`) | 2 días | `{ userEmail }` |
 
 ---
 

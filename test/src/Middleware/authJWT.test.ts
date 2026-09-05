@@ -31,6 +31,7 @@ describe('Middleware: authJWT', () => {
 
     beforeEach(() => {
         req = {
+            headers: {},
             cookies: {},
             body: {}
         };
@@ -43,7 +44,7 @@ describe('Middleware: authJWT', () => {
     });
 
     describe('authJWT', () => {
-        it('should return 401 if no auth token is provided in cookies', async () => {
+        it('should return 401 if no auth token is provided in the header', async () => {
             await authJWT(req as Request, res as Response, next);
 
             expectAppError(next, 401, 'No autorizado: no se proporcionó token', 'TOKEN_MISSING');
@@ -51,9 +52,18 @@ describe('Middleware: authJWT', () => {
             expect(next).not.toHaveBeenCalledWith();
         });
 
+        it('should return 401 if the header does not use the Bearer scheme', async () => {
+            const validToken = jwt.sign({ userEmail: 'test@example.com' }, config.jwtSecret);
+            req.headers = { authorization: validToken };
+
+            await authJWT(req as Request, res as Response, next);
+
+            expectAppError(next, 401, 'No autorizado: no se proporcionó token', 'TOKEN_MISSING');
+        });
+
         it('should call next() and set req.userEmail when the token is valid', async () => {
             const validToken = jwt.sign({ userEmail: 'test@example.com' }, config.jwtSecret);
-            req.cookies = { authTokenAuthorized: validToken };
+            req.headers = { authorization: `Bearer ${validToken}` };
 
             await authJWT(req as Request, res as Response, next);
 
@@ -63,7 +73,7 @@ describe('Middleware: authJWT', () => {
 
         it('should return 401 when the token is expired', async () => {
             const expiredToken = jwt.sign({ userEmail: 'test@example.com' }, config.jwtSecret, { expiresIn: -1 });
-            req.cookies = { authTokenAuthorized: expiredToken };
+            req.headers = { authorization: `Bearer ${expiredToken}` };
 
             await authJWT(req as Request, res as Response, next);
 
@@ -73,7 +83,7 @@ describe('Middleware: authJWT', () => {
 
         it('should return 403 when the token signature is invalid', async () => {
             const invalidToken = jwt.sign({ userEmail: 'test@example.com' }, 'wrong-secret');
-            req.cookies = { authTokenAuthorized: invalidToken };
+            req.headers = { authorization: `Bearer ${invalidToken}` };
 
             await authJWT(req as Request, res as Response, next);
 
@@ -82,7 +92,7 @@ describe('Middleware: authJWT', () => {
         });
 
         it('should return 403 for a malformed token', async () => {
-            req.cookies = { authTokenAuthorized: 'not-a-jwt' };
+            req.headers = { authorization: 'Bearer not-a-jwt' };
 
             await authJWT(req as Request, res as Response, next);
 

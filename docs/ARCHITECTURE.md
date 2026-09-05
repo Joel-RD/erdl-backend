@@ -185,7 +185,7 @@ CREATE INDEX IF NOT EXISTS idx_verification_used ON verification_codes(used);
 
 El sistema implementa un proceso de **3 pasos** con verificación de email por código:
 
-<img src="diagrams/auth-flow.svg" width="100%" alt="Secuencia de autenticación: registro/login, código por email y cookie JWT de sesión">
+<img src="diagrams/auth-flow.svg" width="100%" alt="Secuencia de autenticación: registro/login, código por email y JWT de sesión">
 
 ### Paso 1 · Registro o Login
 
@@ -223,13 +223,13 @@ El sistema implementa un proceso de **3 pasos** con verificación de email por c
 5. Valida el código contra `verification_codes` (no usado, no expirado)
 6. Marca el código como usado (el trigger lo elimina automáticamente)
 7. Marca `email_verified = 1` en el usuario
-8. Establece la cookie `authTokenAuthorized` (JWT de sesión, 2 días)
+8. Devuelve el JWT de sesión (2 días) en el campo `data.authToken` de la respuesta
 
 ### Paso 3 · Rutas protegidas
 
 Middleware `authJWT` en `src/middleware/authJWT.ts`:
 
-1. Extrae la cookie `authTokenAuthorized`
+1. Extrae el token de la cabecera `Authorization: Bearer <token>`
 2. Si no existe → `401`
 3. Verifica el JWT con `jsonwebtoken`
 4. Extrae `userEmail` del payload y lo inyecta en `req.userEmail`

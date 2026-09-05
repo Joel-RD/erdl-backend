@@ -9,7 +9,7 @@
 ![Jest](https://img.shields.io/badge/Testing-Jest-3b6b35?logo=jest&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT-eb6c36?logo=jsonwebtokens&logoColor=white)
 
-**API de acortamiento de URLs** con sistema de autenticación completo: registro, verificación de email por código y rutas protegidas mediante JWT en cookies HttpOnly. Construida con **Node.js**, **Express 5**, **TypeScript** y **LibSQL**.
+**API de acortamiento de URLs** con sistema de autenticación completo: registro, verificación de email por código y rutas protegidas mediante JWT en el header `Authorization: Bearer`. Construida con **Node.js**, **Express 5**, **TypeScript** y **LibSQL**.
 
 ---
 
@@ -29,12 +29,12 @@
 | Área | Detalles |
 |------|----------|
 | **Acortamiento de URLs** | Identificadores únicos de 8 caracteres con `nanoid` |
-| **Autenticación de 3 pasos** | Registro o login → código de verificación por email → cookie JWT firmada |
+| **Autenticación de 3 pasos** | Registro o login → código de verificación por email → token JWT de sesión en `Authorization: Bearer` |
 | **Persistencia de datos** | LibSQL (SQLite local en desarrollo, Turso en producción) |
 | **Protección anti-SSRF** | Validación exhaustiva de URLs (sin IPs privadas, sin localhost, sin credenciales) |
 | **Límite de intentos** | Bloqueo automático tras 5 intentos fallidos (email, contraseña o código) |
 | **Rate limiting** | Protección por IP en cada endpoint |
-| **Seguridad** | Helmet, CORS configurable, cookies HttpOnly/SameSite, bcryptjs (10 rounds) |
+| **Seguridad** | Helmet, CORS configurable, cookie HttpOnly solo para el código temporal de email, bcryptjs (10 rounds) |
 | **Logging** | Winston estructurado con archivos rotativos (5 MB) y Morgan en desarrollo |
 | **Manejo de errores** | Formato de respuesta unificado `{ success, message, data }` / `{ success, error: { code, message, details } }` vía `AppError` y `responseFormat` |
 
@@ -169,7 +169,7 @@ Diagramas técnicos en SVG autocontenido, incrustados a lo largo de la documenta
 | Diagrama | Descripción | Interactivo |
 |----------|-------------|-------------|
 | Arquitectura del sistema | Capas Router → Controller → Service → Repository → LibSQL | [Ver](docs/diagrams/architecture.html) |
-| Flujo de autenticación | Registro/login, verificación por código de email y cookie JWT | [Ver](docs/diagrams/auth-flow.html) |
+| Flujo de autenticación | Registro/login, verificación por código de email y JWT de sesión (Bearer) | [Ver](docs/diagrams/auth-flow.html) |
 | Modelo de datos (ER) | Entidades `users`, `urls` y `verification_codes` | [Ver](docs/diagrams/er-model.html) |
 | Acortar y redirigir URL | Validación anti-SSRF, `nanoid` y redirección 302 | [Ver](docs/diagrams/url-flow.html) |
 

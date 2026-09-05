@@ -47,7 +47,6 @@ export class AuthController {
         }
 
         const { authToken } = await this.authService.verifyEmailCode({ email, code });
-        res.cookie("authTokenAuthorized", authToken, configCookiesParams);
-        return sendOk(res, undefined, "Inicio de sesión correcto.");
+        return sendOk(res, { authToken }, "Inicio de sesión correcto.");
     }
 }

@@ -65,11 +65,11 @@ Busca la URL acortada y redirige con un `302 Found`. Si no existe o está inacti
 
 El sistema usa un proceso de **3 pasos** con verificación de email por código:
 
-<img src="diagrams/auth-flow.svg" width="100%" alt="Secuencia de autenticación: registro/login, código por email y cookie JWT de sesión">
+<img src="diagrams/auth-flow.svg" width="100%" alt="Secuencia de autenticación: registro/login, código por email y JWT de sesión">
 
 1. **Registro o Login** → se envía un código de 6 caracteres por email y se establece la cookie temporal `emailSendToVerifyUser` (JWT, 2 minutos).
-2. **Verificación del código** → el cliente envía el código y, si es correcto, se establece la cookie de sesión `authTokenAuthorized` (JWT, 2 días).
-3. **Rutas protegidas** → el middleware `authJWT` valida la cookie `authTokenAuthorized` en cada petición.
+2. **Verificación del código** → el cliente envía el código y, si es correcto, recibe el JWT de sesión `authToken` en el body de la respuesta (2 días de duración).
+3. **Rutas protegidas** → el middleware `authJWT` valida el `authToken` en el header `Authorization: Bearer <token>` de cada petición.
 
 > **Nota:** si el usuario intenta login o registro mientras tiene un código de verificación activo, recibe un error `429` con el tiempo restante en minutos.
 
@@ -141,14 +141,20 @@ Requiere la cookie `emailSendToVerifyUser` previamente establecida (por registro
 **Respuesta `200 OK`:**
 
 ```json
-{ "success": true, "message": "Inicio de sesión correcto." }
+{
+  "success": true,
+  "message": "Inicio de sesión correcto.",
+  "data": {
+    "authToken": "<jwt>"
+  }
+}
 ```
 
-> Se establece la cookie `authTokenAuthorized` (JWT de sesión, 2 días de duración).
+> El token de sesión se devuelve en el campo `data.authToken` y debe enviarse en el header `Authorization: Bearer <token>` en las rutas protegidas.
 
 ### `GET /api/v1/auth/user/profile` — Consultar perfil
 
-Requiere la cookie `authTokenAuthorized`.
+Requiere el header `Authorization: Bearer <authToken>`.
 
 **Respuesta `200 OK`:**
 

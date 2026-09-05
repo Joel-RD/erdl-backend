@@ -120,17 +120,18 @@ describe('AuthController', () => {
             expect(authService.verifyEmailCode).not.toHaveBeenCalled();
         });
 
-        it('should verify the code and set the auth token cookie', async () => {
+        it('should verify the code and return the auth token in the body', async () => {
             req.body = { email: 'test@gmail.com', code: 'ABC123' };
 
             await controller.postAuthVerifyEmailController(req as Request, res as Response, next);
 
             expect(authService.verifyEmailCode).toHaveBeenCalledWith({ email: 'test@gmail.com', code: 'ABC123' });
-            expect(res.cookie).toHaveBeenCalledWith('authTokenAuthorized', 'auth-token-123', expect.any(Object));
+            expect(res.cookie).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
-                message: 'Inicio de sesión correcto.'
+                message: 'Inicio de sesión correcto.',
+                data: { authToken: 'auth-token-123' }
             });
         });
     });

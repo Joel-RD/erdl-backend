@@ -86,6 +86,8 @@ Todas las variables se leen desde `.env` a través de `dotenv`. La configuració
 | `MAX_AGE` | Tiempo de vida de las cookies (milisegundos) | 7 días (`604800000`) |
 | `COOKIE_PATH` | Ruta de las cookies | `/` |
 
+> **Nota:** estas opciones de cookie aplican únicamente a la cookie temporal de verificación `emailSendToVerifyUser`. El JWT de sesión no se guarda en cookies: se devuelve en el body de `POST /api/v1/auth/verify-email` y se envía en el header `Authorization: Bearer <token>`.
+
 ### Email (Nodemailer / SMTP)
 
 | Variable | Descripción | Valor por defecto |

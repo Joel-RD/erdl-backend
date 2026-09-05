@@ -6,3 +6,4 @@ src/Database/*
 coverage
 assets/desing-shortener
 logs
+dockerfile

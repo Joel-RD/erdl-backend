@@ -31,14 +31,15 @@ function respondTokenError(err: unknown, next: NextFunction): void {
 }
 
 export async function authJWT(req: Request, res: Response, next: NextFunction) {
-    const tokenCookies = req.cookies.authTokenAuthorized;
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
 
-    if (!tokenCookies) {
+    if (!token) {
         return next(new AppError(401, "No autorizado: no se proporcionó token", undefined, "TOKEN_MISSING"));
     }
 
     try {
-        const user = await verifyToken(tokenCookies);
+        const user = await verifyToken(token);
         req.userEmail = user.userEmail;
         next();
     } catch (err) {
