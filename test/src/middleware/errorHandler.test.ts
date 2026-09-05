@@ -43,8 +43,12 @@ describe('errorHandler middleware', () => {
 
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({
-                error: 'Not Found',
-                message: 'Ruta GET /unknown no encontrada'
+                success: false,
+                message: 'Ruta GET /unknown no encontrada',
+                error: {
+                    code: 'NOT_FOUND',
+                    message: 'Ruta GET /unknown no encontrada'
+                }
             });
         });
     });
@@ -56,7 +60,14 @@ describe('errorHandler middleware', () => {
             errorHandler(error, req as Request, res as Response, next);
 
             expect(res.status).toHaveBeenCalledWith(429);
-            expect(res.json).toHaveBeenCalledWith({ message: 'Demasiadas peticiones' });
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Demasiadas peticiones',
+                error: {
+                    code: 'TOO_MANY_REQUESTS',
+                    message: 'Demasiadas peticiones'
+                }
+            });
             expect(mockedLogger.error).not.toHaveBeenCalled();
         });
 
@@ -67,8 +78,29 @@ describe('errorHandler middleware', () => {
 
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({
+                success: false,
                 message: 'Datos inválidos',
-                details: ['campo requerido']
+                error: {
+                    code: 'BAD_REQUEST',
+                    message: 'Datos inválidos',
+                    details: ['campo requerido']
+                }
+            });
+        });
+
+        it('should keep the custom code when the AppError provides one', () => {
+            const error = new AppError(409, 'El email ya está registrado', undefined, 'EMAIL_ALREADY_REGISTERED');
+
+            errorHandler(error, req as Request, res as Response, next);
+
+            expect(res.status).toHaveBeenCalledWith(409);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'El email ya está registrado',
+                error: {
+                    code: 'EMAIL_ALREADY_REGISTERED',
+                    message: 'El email ya está registrado'
+                }
             });
         });
 
@@ -79,8 +111,12 @@ describe('errorHandler middleware', () => {
 
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({
-                error: 'Internal Server Error',
-                message: 'Ocurrió un error inesperado'
+                success: false,
+                message: 'Ocurrió un error inesperado',
+                error: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Ocurrió un error inesperado'
+                }
             });
             expect(mockedLogger.error).toHaveBeenCalled();
         });

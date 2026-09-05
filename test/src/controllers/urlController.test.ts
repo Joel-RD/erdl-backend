@@ -19,6 +19,7 @@ describe('UrlController', () => {
         controller = new UrlController(urlService as any);
         req = { body: {}, params: {} };
         res = {
+            status: jest.fn().mockReturnThis(),
             json: jest.fn(),
             redirect: jest.fn()
         };
@@ -32,9 +33,13 @@ describe('UrlController', () => {
             await controller.shortenerController(req as Request, res as Response);
 
             expect(urlService.shorten).toHaveBeenCalledWith('https://www.google.com');
+            expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
+                success: true,
                 message: 'URL acortada con éxito.',
-                url_acortada: 'http://localhost:3000/abc12345'
+                data: {
+                    url_acortada: 'http://localhost:3000/abc12345'
+                }
             });
         });
     });
